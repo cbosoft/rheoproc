@@ -580,6 +580,7 @@ double max(double *x, size_t len)
 {
   double max = x[0];
   for (size_t i = 1; i < len; i++) {
+    if (x[i] > max)
       max = x[i];
   }
   return max;
