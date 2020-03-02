@@ -23,7 +23,7 @@ def GuessLogType(row, table='LOGS'):
 
 
 
-def GuessLog(row, table='LOGS', *args, **kwargs):
+def GuessLog(row, *args, table='LOGS', **kwargs):
     logType = GuessLogType(row, table)
     return logType(row, *args, **kwargs)
 
