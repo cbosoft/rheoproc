@@ -13,6 +13,6 @@ void parse_csv(char **csv_contents, unsigned int len, double ***data, unsigned i
 void peakdet(double* signal, size_t len, double threshold, double **peaks, size_t **peak_indices, size_t *npeaks, int negative_peaks);
 
 // corr.c
-void get_timecorr(double *t, double *v, unsigned int len, double **tc_x, double **tc_y, unsigned int *tc_len, double *binw, double maxlag);
+void get_timecorr(double *t, double *v, unsigned int len, double **tc_x, double **tc_y, unsigned int *tc_len, double *binw, double maxlag, double fac);
 
 // vim: ft=c

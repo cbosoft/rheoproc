@@ -200,11 +200,15 @@ static PyObject *accelproc_filter_loadcell(PyObject *self, PyObject *args)
 
 PyObject *accelproc_tcorr(PyObject *self, PyObject *args)
 {
-  PyObject *pylist_t, *pylist_v, *pyfloat_binw;
+  PyObject *pylist_t, *pylist_v;
+  double binw = 0.0, max_lag = 0.0, width_factor = 0.0;
 
   if (self == NULL) {}
 
-  if (!PyArg_ParseTuple(args, "O!O!O!", &PyList_Type, &pylist_t, &PyList_Type, &pylist_v, &PyFloat_Type, &pyfloat_binw))
+  if (!PyArg_ParseTuple(args, "O!O!ddd",
+        &PyList_Type, &pylist_t, 
+        &PyList_Type, &pylist_v, 
+        &binw, &max_lag, &width_factor))
     return NULL;
 
   unsigned int len = PyList_Size(pylist_t), nbins;
@@ -212,22 +216,21 @@ PyObject *accelproc_tcorr(PyObject *self, PyObject *args)
     *t = malloc(len*sizeof(double)), 
     *v = malloc(len*sizeof(double)), 
     *dt = NULL, 
-    *corr = NULL, 
-    binw = PyFloat_AsDouble(pyfloat_binw);
+    *corr = NULL;
 
   for (unsigned int i = 0; i < len; i++) {
     t[i] = PyFloat_AsDouble(PyList_GetItem(pylist_t, i));
     v[i] = PyFloat_AsDouble(PyList_GetItem(pylist_v, i));
   }
 
-  get_timecorr(t, v, len, &dt, &corr, &nbins, &binw, 20.0);
+  get_timecorr(t, v, len, &dt, &corr, &nbins, &binw, max_lag, width_factor);
 
   PyObject *pylist_dt, *pylist_corr, *pyint_nbins, *rv;
 
   pylist_dt = PyList_New(nbins);
   pylist_corr = PyList_New(nbins);
   pyint_nbins = PyLong_FromLong((long)nbins);
-  pyfloat_binw = PyFloat_FromDouble(binw);
+  PyObject *pyfloat_binw = PyFloat_FromDouble(binw);
 
   for (unsigned int i = 0; i < nbins; i++) {
     PyList_SetItem(pylist_dt, i, PyFloat_FromDouble(dt[i]));
@@ -248,21 +251,21 @@ PyObject *accelproc_tcorr(PyObject *self, PyObject *args)
 
 PyObject *accelproc_peak_detect(PyObject *self, PyObject *args)
 {
-  PyObject *pylist_signal, *pylist_time, *pyfloat_threshold;
+  PyObject *pylist_signal, *pylist_time;
+  int negative_peaks_p = 0;
+  double threshold = 0.0;
 
   if (self == NULL) {}
 
-  if (!PyArg_ParseTuple(args, "O!O!O!", 
+  if (!PyArg_ParseTuple(args, "O!O!dp", 
         &PyList_Type, &pylist_time, 
         &PyList_Type, &pylist_signal, 
-        &PyFloat_Type, &pyfloat_threshold))
+        &threshold, &negative_peaks_p))
     return NULL;
 
-  double *sig=NULL, *time=NULL, *peaks=NULL, threshold;
-  unsigned int len, npeaks, *peak_indices=NULL;
+  double *sig = NULL, *time = NULL, *peaks = NULL;
+  size_t len, npeaks, *peak_indices = NULL;
 
-  threshold = PyFloat_AsDouble(pyfloat_threshold);
-  
   len = PyList_Size(pylist_signal);
 
   sig = malloc(len*sizeof(double));
@@ -272,11 +275,11 @@ PyObject *accelproc_peak_detect(PyObject *self, PyObject *args)
     time[i] = PyFloat_AsDouble(PyList_GetItem(pylist_time, i));
   }
 
-  peakdet(sig, len, threshold, &peaks, &peak_indices, &npeaks, 0);
+  peakdet(sig, len, threshold, &peaks, &peak_indices, &npeaks, negative_peaks_p);
 
   double *peaktimes = malloc(npeaks*sizeof(double));
-  for (unsigned int i = 0; i < npeaks; i++) {
-    unsigned int j = peak_indices[i];
+  for (size_t i = 0; i < npeaks; i++) {
+    size_t j = peak_indices[i];
     peaktimes[i] = time[j];
   }
 
@@ -291,8 +294,8 @@ PyObject *accelproc_peak_detect(PyObject *self, PyObject *args)
     PyList_SetItem(pylist_peaktimes, i, PyFloat_FromDouble(peaktimes[i]));
   }
 
-  PyTuple_SetItem(rv, 0, pylist_peaks);
-  PyTuple_SetItem(rv, 1, pylist_peaktimes);
+  PyTuple_SetItem(rv, 0, pylist_peaktimes);
+  PyTuple_SetItem(rv, 1, pylist_peaks);
 
   free(sig);
   free(time);
