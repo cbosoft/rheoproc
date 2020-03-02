@@ -40,11 +40,18 @@ void get_timecorr(
     maxlag = DBL_MAX;
 
   double *bins = calloc(nbins, sizeof(double));
+  double tspan = t[len-1] - t[0];
 
   // get correlation
   for (size_t i = 0; i < len; i++) {
-    for (size_t j = i+1; j < len; j++) {
-      double dt = t[j] - t[i];
+    for (size_t j = 0; j < len; j++) {
+      // wrap to front
+      size_t k = (i+j) % len;
+      size_t wrapped = (i+j) / len;
+      double dt = t[k] - t[i];
+      if (wrapped) 
+        dt += tspan;
+
       if (dt > maxlag)
         break;
       size_t bi = dt/(*binw);
