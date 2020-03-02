@@ -2,7 +2,7 @@ from numpy import power
 from datetime import datetime as dt
 
 from rheoproc.sql import execute_sql
-import rheoproc.nonesafemath as ns
+import rheoproc.nansafemath as ns
 
 CALIBRATIONS = [
     {

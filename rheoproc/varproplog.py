@@ -3,7 +3,7 @@ from enum import Enum, auto
 import numpy as np
 
 from rheoproc.exception import CategoryError
-import rheoproc.nonesafemath as ns
+import rheoproc.nansafemath as ns
 
 class Categories(Enum):
     RHEOLOGY_ONLY = auto()

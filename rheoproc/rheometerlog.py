@@ -20,7 +20,7 @@ from rheoproc.exception import FileTypeError, PathNotAFileError, TimeRationalErr
 from rheoproc.genericlog import GenericLog
 from rheoproc.varproplog import Categories
 from rheoproc.videodata import VideoData
-import rheoproc.nonesafemath as ns
+import rheoproc.nansafemath as ns
 from rheoproc.software_versions import SW_VER_COMPLETE_LOG
 from rheoproc.hardware_versions import HW_VER_PND_MONO, HW_VER_PND_SPLIT
 from rheoproc.pnd import pnd_recombine
