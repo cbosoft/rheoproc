@@ -1,29 +1,40 @@
 import sys
 
-from rheoproc.usage import show_usage_and_exit
+import rheoproc.plot as plot
+import rheoproc.query as query
+import rheoproc.nansafemath as nansafemath
 
-if '--help' or '-h' in sys.argv:
-    show_usage_and_exit()
+from rheoproc.plot import plot_init, get_plot_name, MultiPagePlot
+from rheoproc.query import get_log, get_group, query_db
 
-major, minor, micro, rel, serial = sys.version_info
-if major < 3 or minor < 8:
-    raise Exception('tdlib needs at least Python 3.8 (Got: Python {0}.{1})'.format(major, minor))
 
-import importlib
-def __check_module(name):
-    try:
-        mod = importlib.import_module(name)
-        return True
-    except:
-        return False
+def args_check():
+    if '--help' in sys.argv or '-h' in sys.argv:
+        from rheoproc.usage import show_usage_and_exit
+        show_usage_and_exit()
 
-__modules = ['numpy', 'matplotlib', 'sympy', 'lmfit', 'scipy']
+def version_check():
+    major, minor, micro, rel, serial = sys.version_info
+    if major < 3 or minor < 8:
+        raise Exception('tdlib needs at least Python 3.8 (Got: Python {0}.{1})'.format(major, minor))
 
-__exit = False
-for __module in __modules:
-    if not __check_module(__module):
-        print(f'Could not import {__module}, ensure it is installed.')
-        __exit = True
+def modules_check():
+    import importlib
+    def check_module(name):
+        try:
+            mod = importlib.import_module(name)
+            return True
+        except:
+            return False
+    modules = ['numpy', 'matplotlib', 'sympy', 'lmfit', 'scipy', 'cv2']
+    missing_modules = [module for module in modules if not check_module(module)]
+    if missing_modules:
+        raise ImportError(f'Could not import required modules: {", ".join(missing_modules)}')
 
-if __exit:
-    sys.exit(1)
+args_check()
+version_check()
+modules_check()
+
+del args_check
+del version_check
+del modules_check
