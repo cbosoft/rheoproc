@@ -14,4 +14,4 @@ def convert_bit_to_volts(b, *, bit_length, max_voltage):
     Convert a signal from n-bit number to a voltage.
     '''
     max_b = (2 << bit_length) - 1
-    return np.multiply(np.divie(b, max_b), max_voltage)
+    return np.multiply(np.divide(b, max_b), max_voltage)
