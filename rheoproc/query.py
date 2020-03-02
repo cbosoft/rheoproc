@@ -18,6 +18,8 @@ ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
 
 def get_log(ID, database, Log=GuessLog, **kwargs):
 
+    database = os.path.expanduser(database)
+
     assert isinstance(ID, (int, list))
 
     if isinstance(ID, list):
@@ -80,6 +82,8 @@ def get_group(GROUP, database, *other_sql, Log=GuessLog, order_by=None, descendi
     if isinstance(GROUP, list):
         return [get_group(GROUP_item, Log, **kwargs) for GROUP_item in GROUP]
 
+    database = os.path.expanduser(database)
+
     if order_by is not None:
         orderbysql = f"ORDER BY '{order_by}'"
         if descending:
@@ -99,6 +103,8 @@ def async_get(args_and_kwargs):
 
 
 def query_db(query, database, plain_collection=False, max_results=500, process_results=True, max_processes=20, **kwargs):
+
+    database = os.path.expanduser(database)
 
     caching = '--no-cache' not in sys.argv
 
