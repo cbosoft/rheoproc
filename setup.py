@@ -5,6 +5,7 @@ def main():
     accelproc_sources = glob('src/*.c')
     setup(
         name='rheoproc', 
+        description='Rheometer log processing library',
         version='0.2', 
         packages=['rheoproc'],
         ext_modules=[
