@@ -39,9 +39,9 @@ class RheometerLog(GenericLog):
     acceptable_extensions = ['.tar', '.gz', '.bz2']
 
 
-    def __init__(self, row, **kwargs):
+    def __init__(self, row, data_dir, **kwargs):
         super().__init__()
-        self.parse_row(row, **kwargs)
+        self.parse_row(row, data_dir, **kwargs)
         data = self.process_data(self, **kwargs)
         self.set_data(data, **kwargs)
 
