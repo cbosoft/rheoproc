@@ -142,8 +142,7 @@ double *diff(double* x, size_t len)
   double *rv = malloc(sizeof(double)*(len-1));
   size_t i, j;
 
-  for (i=0; i < (len-1); i++) {
-    j = i+1;
+  for (i = 0, j = 1; i < (len-1); i++, j++) {
     rv[i] = x[j] - x[i];
   }
 
@@ -568,8 +567,8 @@ double prod(double * in, size_t len)
 
 double min(double *x, size_t len)
 {
-  double min = DBL_MAX;
-  for (unsigned int i = 0; i < len; i++) {
+  double min = x[0];
+  for (size_t i = 1; i < len; i++) {
     if (x[i] < min)
       min = x[i];
   }
@@ -579,9 +578,8 @@ double min(double *x, size_t len)
 
 double max(double *x, size_t len)
 {
-  double max = DBL_MIN;
-  for (unsigned int i = 0; i < len; i++) {
-    if (x[i] < max)
+  double max = x[0];
+  for (size_t i = 1; i < len; i++) {
       max = x[i];
   }
   return max;
