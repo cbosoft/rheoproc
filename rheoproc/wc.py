@@ -86,7 +86,7 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
     plt.text(phi_o*1.01, 2*sigma_min, '$\\phi_o$', ha='left')
     plt.xlabel(r'Volume Fraction, $\phi$')
 
-    plt.ylabel(r"$\sigma\rm/Pa\,s$")
+    plt.ylabel(r"$\sigma\rm/Pa$")
 
     # plt.text(
     #         phi_o + (0.7*(highphi - phi_o)),
