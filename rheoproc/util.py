@@ -3,11 +3,23 @@ import os
 
 import numpy as np
 
+
+def convert_bit_to_volts(b, *, bit_length, max_voltage):
+    '''
+    Convert a signal from n-bit number to a voltage.
+    e.g. a value of 512 for a 10 bit number 
+    representing a voltage up to 5v would give 2.5v.
+    '''
+    max_b = (2 << (bit_length - 1)) - 1
+    return np.multiply(np.divide(b, max_b), max_voltage)
+
+
 def get_hostname():
     pr = sp.Popen('hostname', stdout=sp.PIPE)
     rv = pr.wait()
     hname = pr.stdout.read().decode()[:-1]
     return hname
+
 
 def head(table, rows=5, column_first=True):
     '''
@@ -19,12 +31,14 @@ def head(table, rows=5, column_first=True):
     for row in table[:rows]:
         print(row)
 
+
 def tex_safe(unsafe_string):
     safe_string = unsafe_string.replace('_', '\\_')
     safe_string = safe_string.replace('%', '\\%')
     safe_string = safe_string.replace('&', '\\&')
     safe_string = safe_string.replace('#', '\\#')
     return safe_string
+
 
 def bash_safe(unsafe_string):
     safe_string = unsafe_string.replace('(', r'\(')
@@ -35,6 +49,7 @@ def bash_safe(unsafe_string):
     safe_string = safe_string.replace('!', r'\!')
     return safe_string
 
+
 def is_number(s):
     
     assert isinstance(s, str)
@@ -44,6 +59,7 @@ def is_number(s):
     except ValueError:
         return False
     return not np.isnan(v)
+
 
 def runsh(command, output='stdout'):
     

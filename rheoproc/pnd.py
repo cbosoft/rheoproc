@@ -1,4 +1,5 @@
 import numpy as np
+from rheoproc.util import convert_bit_to_volts
 
 
 def pnd_recombine(channel1, channel2):
@@ -7,11 +8,3 @@ def pnd_recombine(channel1, channel2):
     '''
     #TODO: improve this
     return convert_bit_to_volts(np.subtract(channel1, channel2), bit_length=12, max_voltage=3.3)
-
-
-def convert_bit_to_volts(b, *, bit_length, max_voltage):
-    '''
-    Convert a signal from n-bit number to a voltage.
-    '''
-    max_b = (2 << bit_length) - 1
-    return np.multiply(np.divide(b, max_b), max_voltage)
