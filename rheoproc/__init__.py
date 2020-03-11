@@ -1,5 +1,13 @@
-import sys
+import atexit
+def closing_message():
+    timestamp(f'done!')
 
+atexit.register(closing_message)
+
+del atexit
+
+
+import sys
 def args_check():
     if '--help' in sys.argv or '-h' in sys.argv:
         from rheoproc.usage import show_usage_and_exit
@@ -30,6 +38,7 @@ modules_check()
 del args_check
 del version_check
 del modules_check
+del sys
 
 import rheoproc.plot as plot
 import rheoproc.query as query
@@ -39,3 +48,8 @@ import rheoproc.fft as fft
 
 from rheoproc.plot import plot_init, get_plot_name, MultiPagePlot, pyplot
 from rheoproc.query import get_log, get_group, query_db
+from rheoproc.error import timestamp, warning
+from rheoproc.version import version
+
+timestamp(f'rheoproc {version} initialised')
+
