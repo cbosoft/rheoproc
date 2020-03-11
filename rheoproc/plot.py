@@ -7,6 +7,7 @@ from matplotlib import pyplot
 from rheoproc.error import warning
 from rheoproc.usage import show_usage_and_exit
 from rheoproc.util import runsh, get_hostname
+from rheoproc.error import timestamp
 
 
 def get_plot_name(subplot_name=None, ext='.pdf'):
@@ -17,6 +18,8 @@ def get_plot_name(subplot_name=None, ext='.pdf'):
         name = f'../img/{n}-{subplot_name}{ext}'
     else:
         name = f'../img/{n}{ext}'
+
+    timestamp(f'Plotting "{name}"')
 
     return name
 
