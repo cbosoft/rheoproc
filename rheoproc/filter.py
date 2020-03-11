@@ -1,6 +1,9 @@
 import numpy as np
 from scipy import signal
 
+from rheoproc.accelproc import moving_mean as accel_moving_mean
+
+
 def filt(t, v, freq=10, order=10, bt='low'):
     '''
     apply a frequency filter (butterworth) to a timeseries signal
@@ -36,7 +39,12 @@ def strip(*args, f):
     return list(zip(*byrow))
 
 
-def moving_average(v, w, *, avf=np.average):
+def moving_average(v, w, *, avf=None):
+
+    if avf is None:
+        return accel_moving_mean(list(v), w)
+
+
     l = len(v)
     rv = [0]*l
     for i in range(len(v)):

@@ -4,11 +4,51 @@
 #include <float.h>
 
 #include "accelproc.h"
+#include "vector.h"
 
 #define TRIPS_PER_REV 12.0
 #define CLOSE_THRESH 0.001
 
 #define APPROX_EQUAL(A, B, T) ((A < (B+T)) && (A > (B-T)))
+
+int pylist_to_double_array(PyObject *po, double **x_ptr, size_t *len_ptr)
+{
+  size_t len = PyList_Size(po);
+
+  double *x = malloc(len*sizeof(double));
+  for (size_t i = 0; i < len; i++) {
+
+    PyObject *value = PyList_GetItem(po, i);
+
+    if (!value) {
+      PyErr_SetString(PyExc_Exception, "List was unexpectedly shorter; something weird has gone on.");
+      return 1;
+    }
+
+    x[i] = PyFloat_AsDouble(value);
+    if (PyErr_Occurred()) {
+      return 1;
+    }
+  }
+
+  (*x_ptr) = x;
+  (*len_ptr) = len;
+  return 0;
+}
+
+PyObject *pylist_from_double_array(double *x, size_t len)
+{
+  PyObject *rv = PyList_New(len);
+  for (unsigned int i = 0; i < len; i++) {
+    PyObject *f = PyFloat_FromDouble(x[i]);
+
+    if (!f)
+      return NULL;
+
+    PyList_SetItem(rv, i, f);
+  }
+  return rv;
+}
 
 
 static PyObject *accelproc_parse_csv(PyObject *self, PyObject *args)
@@ -60,14 +100,11 @@ static PyObject *accelproc_clean_optenc_events(PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "O!", &PyList_Type, &pylist_events))
     return NULL;
 
-  unsigned int nevents = PyList_Size(pylist_events);
+  size_t nevents = 0;
+  double *events = NULL;
 
-  double *events = malloc(nevents*sizeof(double));
-  for (unsigned int i = 0; i < nevents; i++) {
-    PyObject *value = PyList_GetItem(pylist_events, i);
-    // TODO: error checking
-    events[i] = PyFloat_AsDouble(value);
-  }
+  if (pylist_to_double_array(pylist_events, &events, &nevents)) 
+    return NULL;
 
   double *clean_events;
   unsigned int nclean;
@@ -75,10 +112,7 @@ static PyObject *accelproc_clean_optenc_events(PyObject *self, PyObject *args)
   opt_reject(events, nevents, &clean_events, &nclean);
   free(events);
 
-  PyObject *pylist_clean = PyList_New(nclean);
-  for (unsigned int i = 0; i < nclean; i++) {
-    PyList_SetItem(pylist_clean, i, PyFloat_FromDouble(clean_events[i]));
-  }
+  PyObject *pylist_clean = pylist_from_double_array(clean_events, nclean);
 
   free(clean_events);
 
@@ -306,6 +340,32 @@ PyObject *accelproc_peak_detect(PyObject *self, PyObject *args)
 }
 
 
+static PyObject *accelproc_moving_mean(PyObject *self, PyObject *args)
+{
+  (void) self;
+
+  PyObject *po_x = NULL;
+  unsigned int w;
+
+
+  if (!PyArg_ParseTuple(args, "O!I", &PyList_Type, &po_x, &w))
+    return NULL;
+
+  size_t len = 0;
+  double *x = NULL;
+  pylist_to_double_array(po_x, &x, &len);
+  Py_DECREF(po_x);
+
+  double *avx = moving_mean(x, len, w);
+  free(x);
+
+  PyObject *rv = pylist_from_double_array(avx, len);
+  free(avx);
+
+  return rv;
+}
+
+
 
 
 
@@ -317,9 +377,10 @@ static PyMethodDef accelproc_methods[] = {
     {"speed_from_optenc_events",  accelproc_speed_from_optenc_events, METH_VARARGS, "Convert a list of N optical encoder events to a list of N speeds. Expects events to be clean, errors and misfires are NOT removed."},
     {"clean_optenc_events", accelproc_clean_optenc_events, METH_VARARGS, "Clean a list of optenc events of mis-fires."},
     {"parse_csv", accelproc_parse_csv, METH_VARARGS, "Parse CSV contents to list of columns of floats."},
-    {"filter_loadcell", accelproc_filter_loadcell, METH_VARARGS, "filter out non-sensible values from loadcell"},
-    {"peak_detect", accelproc_peak_detect, METH_VARARGS, "find peaks and associated times for a timeseries"},
-    {"tcorr", accelproc_tcorr, METH_VARARGS, "get time correlation of data"},
+    {"filter_loadcell", accelproc_filter_loadcell, METH_VARARGS, "Filter out non-sensible values from loadcell."},
+    {"peak_detect", accelproc_peak_detect, METH_VARARGS, "Find peaks and associated times for a timeseries."},
+    {"tcorr", accelproc_tcorr, METH_VARARGS, "Returns time correlation (autocorrelation) of data."},
+    {"moving_mean", accelproc_moving_mean, METH_VARARGS, "Returns the moving mean of signal x with window size w."},
     {NULL, NULL, 0, NULL}
 };
 

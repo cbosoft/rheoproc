@@ -36,9 +36,10 @@ double max(double *x, size_t len);
 // stats
 double average(double * in, size_t len);
 double mean(double * in, size_t len);
-double median(double * in, size_t len);
+// double median(double * in, size_t len); disabled as sort is not available right now
 double sum(double * in, size_t len);
 double prod(double * in, size_t len);
+double *moving_mean(double *x, size_t len, int w);
 
 
 // jobs

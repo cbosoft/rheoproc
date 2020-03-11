@@ -585,3 +585,15 @@ double max(double *x, size_t len)
   }
   return max;
 }
+
+double *moving_mean(double *x, size_t len, int w)
+{
+  double *rv = malloc(len*sizeof(double));
+  for (int i = 0; i < (int)len; i++) {
+    int start = i-w < 0 ? 0 : i-w;
+    int end = i+w > (int)(len-1) ? (int)(len-1) : i+w;
+    rv[i] = sumrange(x, start, end);
+    rv[i] /= (double)(end-start);
+  }
+  return rv;
+}
