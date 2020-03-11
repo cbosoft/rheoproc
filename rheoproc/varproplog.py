@@ -140,6 +140,20 @@ class VariablePropertiesLog:
     def temperature_std(self):
         return self.get('temperature_std')
 
+
+    @property
+    def ambient_temperature(self):
+        return self.get('ambient_temperature')
+
+    @property
+    def ambient_temperature_av(self):
+        return self.get('ambient_temperature_av')
+
+    @property
+    def ambient_temperature_std(self):
+        return self.get('ambient_temperature_std')
+
+
     @property
     def encoders(self):
         return self.get('encoders')
