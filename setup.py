@@ -1,12 +1,16 @@
 from glob import glob
 from distutils.core import setup, Extension
+from importlib.util import spec_from_file_location, module_from_spec
+
+with open("rheoproc/version.py") as f:
+    ver = f.readline().split('=')[-1].strip().replace('\'', '').replace('"', '')
 
 def main():
     accelproc_sources = glob('src/*.c')
     setup(
         name='rheoproc', 
         description='Rheometer log processing library',
-        version='0.2', 
+        version=ver, 
         packages=['rheoproc'],
         install_requires=[
             'numpy',
