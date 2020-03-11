@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 import numpy as np
 
-from rheoproc.exception import CategoryError
+from rheoproc.exception import CategoryError, DataUnavailableError
 import rheoproc.nansafemath as ns
 
 class Categories(Enum):
@@ -150,7 +150,10 @@ class VariablePropertiesLog:
 
     def get(self, prop):
         try:
-            return np.array(self.data[prop])
+            rv = np.array(self.data[prop])
+            if rv is None:
+                raise DataUnavailableError(f'Requested property "{prop}" is not in this log file.')
+            return rv
         except KeyError as e:
             # TODO: generate error details once
             details  = f'Requested property "{prop}" cannot be found, '
@@ -160,6 +163,7 @@ class VariablePropertiesLog:
             for cat in list(Categories):
                 details += f'  {cat}'
             raise CategoryError(details) from e
+
 
     def set(self, prop, value):
         self.data[prop] = value

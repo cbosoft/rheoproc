@@ -26,3 +26,7 @@ class TimeRationalError(Exception):
 
 class CategoryError(Exception):
     '''The data you requested cannot be found. The category for the data was not requested.'''
+
+
+class DataUnavailableError(Exception):
+    '''The data you requested is missing in the original log file and therefore cannot be obtained.'''
