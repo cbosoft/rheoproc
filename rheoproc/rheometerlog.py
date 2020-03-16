@@ -102,8 +102,6 @@ class RheometerLog(GenericLog):
             print(self.ID, self.path)
             raise
 
-        # default run params if none are specified
-        run_params = {'depth_mm': 73.0}
         with tarfile.open(self.path, 'r:*') as tarlog:
             for member in tarlog.getmembers():
                 if RUNPARAMS_RE.match(member.name):
@@ -113,7 +111,18 @@ class RheometerLog(GenericLog):
                     pass
 
             self.run_params = run_params
-            self.fill_depth = run_params['depth_mm']
+            if 'fill_depth_mm' in run_params:
+                self.fill_depth = run_params['fill_depth_mm']
+            elif 'depth_mm' in run_params:
+                self.fill_depth = run_params['depth_mm']
+            else:
+                warning('legacy log: no fill depth information available (using default of 73)')
+                self.fill_depth = 73.0
+
+            if 'needle_depth_mm' in run_params:
+                self.needle_depth =  run_params['needle_depth_mm']
+            else:
+                warning('legacy log: no needle depth information available')
 
             for member in tarlog.getmembers():
                 if OPTENC_LOG_RE.match(member.name):
@@ -216,7 +225,7 @@ class RheometerLog(GenericLog):
         strainrate = np.divide(speed_ms, gap)
 
         load_torque = apply_calibration(loadcell, speed, self.override_calibration, self.date)
-        stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*run_params['depth_mm']))
+        stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*self.fill_depth))
 
         viscosity = ns.divide(stress, strainrate)
         expected_viscosity = get_material_viscosity(self.material, np.array(temperature, dtype=np.float64))
