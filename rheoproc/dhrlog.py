@@ -62,3 +62,16 @@ class DHRLog(GenericLog):
                 stress, strainrate, viscosity = stripped
 
         return stress, strainrate, viscosity
+
+    def get_stress_strainrate_viscosity(self):
+        stress = list()
+        strainrate = list()
+        viscosity = list()
+
+        for member in self.members:
+            stress.extend(self.member_data[member]['stress'])
+            strainrate.extend(self.member_data[member]['strain_rate'])
+            viscosity.extend(self.member_data[member]['viscosity'])
+        viscosity = np.divide(viscosity, 1000.0)
+
+        return stress, strainrate, viscosity
