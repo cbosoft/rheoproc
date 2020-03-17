@@ -1,10 +1,3 @@
-import atexit
-def closing_message():
-    timestamp(f'done!')
-
-atexit.register(closing_message)
-
-del atexit
 
 
 import sys
@@ -34,6 +27,14 @@ def modules_check():
 args_check()
 version_check()
 modules_check()
+
+import atexit
+def closing_message():
+    timestamp(f'done!')
+
+atexit.register(closing_message)
+
+del atexit
 
 del args_check
 del version_check
