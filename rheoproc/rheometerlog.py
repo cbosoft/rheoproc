@@ -197,10 +197,10 @@ class RheometerLog(GenericLog):
             print("Log is TSTS log?") # TODO check and work around this
             sys.exit(1)
 
-        if len(dat) > 11:
+        if len(dat) > 12:
             ambient_temperature = dat[12]
         else:
-            ambient_temperature = None
+            ambient_temperature = [np.nan for __ in temperature]
 
         if not encoders:
             raise Exception("No optical encoder logs")
