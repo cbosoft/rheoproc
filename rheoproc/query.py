@@ -16,7 +16,7 @@ from rheoproc.error import timestamp
 ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
 
 
-def get_log(ID, database, Log=GuessLog, **kwargs):
+def get_log(ID, database='../data/.database.db', Log=GuessLog, **kwargs):
 
     database = os.path.expanduser(database)
 
@@ -75,7 +75,7 @@ def format_condition(column, operand, operation='=', combination='any'):
 
 
 
-def get_group(GROUP, database, *other_sql, Log=GuessLog, order_by=None, descending=False, **kwargs):
+def get_group(GROUP, database='../data/.database.db', *other_sql, Log=GuessLog, order_by=None, descending=False, **kwargs):
 
     assert isinstance(GROUP, (str, list))
 
@@ -102,7 +102,7 @@ def async_get(args_and_kwargs):
     return rv
 
 
-def query_db(query, database, plain_collection=False, max_results=500, process_results=True, max_processes=20, **kwargs):
+def query_db(query, database='../data/.database.db', plain_collection=False, max_results=500, process_results=True, max_processes=20, **kwargs):
 
     database = os.path.expanduser(database)
 
