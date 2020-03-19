@@ -100,3 +100,10 @@ def this_proc_mem_gb():
     #         total_memkb += int(child_memkb)
     # total_memkb += shared_memkb
     return float(total_memkb)*0.001*0.001
+
+def is_between(v, mn, mx):
+    try:
+        len(v)
+        return all([is_between(vi, mn, mx) for vi in v])
+    except:
+        return mn <= v <= mx

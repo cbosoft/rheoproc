@@ -1,6 +1,8 @@
 import re
 import numpy as np
 
+from rheoproc.util import is_between
+
 # glycerol and water information from Cheng2008
 
 GLYCEROL_RE = re.compile(r'^G0999$')
@@ -53,7 +55,9 @@ def get_viscosity_water(T):
 
 
 def get_viscosity_glycerol_water_mix(T, Cm):
-    assert 0.0 <= Cm <= 1.0
+    
+    assert is_between(Cm, 0.0, 1.0)
+
     a = np.subtract(0.705, np.multiply(0.0017, T))
     b = np.multiply(np.add(4.9, np.multiply(0.036, T)), np.power(a, 2.5))
     num = np.multiply(np.multiply(a, b), np.multiply(Cm, np.subtract(1, Cm)))
