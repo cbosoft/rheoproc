@@ -143,15 +143,15 @@ def query_db(query, database, plain_collection=False, max_results=500, process_r
     order = [r['ID'] for r in results]
 
     processes = int(runsh('nproc')[0])
-    running_threads = int(runsh('top -b -n 1 | grep "^Tasks"')[0].split()[3])
-    processes = int((processes - running_threads)*0.7)
-    if max_processes:
-        processes = min([processes, max_processes])
+    # running_threads = int(runsh('top -b -n 1 | grep "^Tasks"')[0].split()[3])
+    # processes = int((processes - running_threads)*0.7)
+    # if max_processes:
+    #     processes = min([processes, max_processes])
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
     with mp.Pool(processes=processes) as pool:
-        for r in pool.imap_unordered(async_get, [tuple([ tuple([dict(res), data_dir]), kwargs]) for res in results], 10):
+        for r in pool.imap_unordered(async_get, [tuple([ tuple([dict(res), data_dir]), kwargs]) for res in results]):
             pb.update()
             processed_results[r.ID] = r
 
