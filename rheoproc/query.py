@@ -75,12 +75,21 @@ def format_condition(column, operand, operation='=', combination='any'):
 
 
 
-def get_group(GROUP, database='../data/.database.db', *other_sql, Log=GuessLog, order_by=None, descending=False, **kwargs):
+def get_group(GROUP, database='../data/.database.db', Log=GuessLog, order_by=None, descending=False, flat=True, **kwargs):
 
     assert isinstance(GROUP, (str, list))
 
     if isinstance(GROUP, list):
-        return [get_group(GROUP_item, Log, **kwargs) for GROUP_item in GROUP]
+        get_sub_group = lambda gi: get_group(gi, Log=Log, order_by=order_by, descending=descending, **kwargs)
+        if flat:
+            rv = list()
+            for GROUP_item in GROUP:
+                res = get_sub_group(GROUP_item)
+                for res_item in res:
+                    rv.append(res_item)
+            return rv
+        else:
+            return [get_sub_group(GROUP_item) for GROUP_item in GROUP]
 
     database = os.path.expanduser(database)
 
@@ -91,9 +100,8 @@ def get_group(GROUP, database='../data/.database.db', *other_sql, Log=GuessLog, 
     else:
         orderbysql = ""
 
-    other_sql_f = ' '.join(other_sql)
+    return query_db(f'SELECT * FROM LOGS WHERE (TAGS LIKE "%;{GROUP};%" OR TAGS LIKE "{GROUP};%" OR TAGS = "{GROUP}") {orderbysql};', database, plain_collection=True, **kwargs)
 
-    return query_db(f'SELECT * FROM LOGS WHERE (TAGS LIKE "%;{GROUP};%" OR TAGS LIKE "{GROUP};%" OR TAGS = "{GROUP}") {other_sql_f} {orderbysql};', database, plain_collection=True, **kwargs)
 
 
 def async_get(args_and_kwargs):
