@@ -151,10 +151,6 @@ def query_db(query, database='../data/.database.db', plain_collection=False, max
     order = [r['ID'] for r in results]
 
     processes = int(runsh('nproc')[0])
-    # running_threads = int(runsh('top -b -n 1 | grep "^Tasks"')[0].split()[3])
-    # processes = int((processes - running_threads)*0.7)
-    # if max_processes:
-    #     processes = min([processes, max_processes])
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
