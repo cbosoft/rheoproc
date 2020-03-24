@@ -33,7 +33,12 @@ def get_next_cache_name(query):
 
 def read_index():
     with open(f'{CACHE_DIR}/index.json') as indexf:
-        index = json.load(indexf)
+        fc = indexf.read()
+    try:
+        index = json.loads(fc)
+    except:
+        print(fc)
+        raise
     return index
 
 
@@ -80,22 +85,23 @@ def load_from_cache(key):
     index = read_index()
 
     if key not in index:
+        warning('Key not in index.')
         return None
 
     if '--fresh' in sys.argv:
-        timestamp("Clearing cached version of requested object.")
+        warning('Clearing cached version of requested object.')
         remove_from_index(key, index)
         return None
 
     entry = index[key]
     if not os.path.isfile(entry['path']):
-        timestamp("Could not find cached blob; removing from index.")
+        warning('Could not find cached blob; removing from index.')
         remove_from_index(key, index)
         return None
 
     now = time.time()
     if 'expires' in entry.keys() and now > entry['expires']:
-        timestamp("Cache item expired; removing from index")
+        timestamp('Cache item expired; removing from index.')
         remove_from_index(key, index)
         return None
 
@@ -105,13 +111,14 @@ def load_from_cache(key):
             dep_mtime = os.path.getmtime(dep)
 
             if dep_mtime > pickle_mtime:
+                warning(f'Dependency {dep} newer than cache.')
                 return None
 
     try:
         with open(entry['path'], 'rb') as pf:
             o = pickle.load(pf)
-    except:
-        warning("Error loading cached file; removing from index.")
+    except Exception as e:
+        warning(f'Error loading cached file; removing from index. Error: {e}')
         os.remove(entry['path'])
         remove_from_index(key, index)
         return None
