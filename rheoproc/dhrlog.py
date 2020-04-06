@@ -75,3 +75,12 @@ class DHRLog(GenericLog):
         viscosity = np.divide(viscosity, 1000.0)
 
         return stress, strainrate, viscosity
+
+    def get_prop(self, name):
+        
+        assert name in self.member_data[self.members[0]].keys()
+
+        rv = list()
+        for member in self.members:
+            rv.extend(self.member_data[member][name])
+        return rv
