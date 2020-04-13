@@ -57,6 +57,8 @@ def save_to_cache(key, obj, depends_on=None, expires=None, expires_in_seconds=No
         index[key]['path'] = name
 
         if depends_on:
+            if isinstance(depends_on, str):
+                depends_on = [depends_on]
             index[key]['depends_on'] = depends_on
 
         if expires is not None:
