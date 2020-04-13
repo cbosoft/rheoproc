@@ -48,6 +48,7 @@ import rheoproc.util as util
 import rheoproc.fft as fft
 
 from rheoproc.plot import plot_init, get_plot_name, MultiPagePlot, pyplot
+from rheoproc.data import get_data_loader
 from rheoproc.query import get_log, get_group, query_db
 from rheoproc.error import timestamp, warning
 from rheoproc.version import version
