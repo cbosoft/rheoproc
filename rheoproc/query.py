@@ -110,7 +110,7 @@ def async_get(args_and_kwargs):
     return rv
 
 
-def query_db(query, database='../data/.database.db', plain_collection=False, max_results=500, process_results=True, max_processes=20, **kwargs):
+def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, **kwargs):
 
     database = os.path.expanduser(database)
 
