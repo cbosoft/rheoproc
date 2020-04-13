@@ -70,7 +70,7 @@ def save_to_cache(key, obj, depends_on=None, expires=None, expires_in_seconds=No
     
     write_index(index)
     
-    timestamp(f'saving object {hsh[:5]}... to cache.')
+    timestamp(f'saving object {hsh[:3]}...{hsh[-3:]} to cache.')
     with open(name, 'wb') as pf:
         pickle.dump(obj, pf, protocol=4)
 
