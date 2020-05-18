@@ -36,6 +36,9 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
                        mass_fractions=False, compositions=None, names=None,
                        legend=True, lowphi=0.01, highphi=1.0, xlim_off=0.01, 
                        npoints=1000, sigma_max=1e4, sigma_min=0.1, yield_line=1e5,
+                       cst_label_pos=(0,0.5), cst_label=r'\centering Continuous Shear\\Thickening\\', cst_label_kwargs={'ha':'left','va':'center'},
+                       sj_label_pos=(0.5,0.5), sj_label=r'\centering Shear\\Jamming\\', sj_label_kwargs={'ha':'center','va':'center'},
+                       j_label_pos=(0.98,0.5), j_label=r'Jammed', j_label_kwargs={'ha':'right','va':'center'},
                        **kwargs):
     assert 0.0 <= lowphi < highphi
     assert lowphi < highphi <= 1.0
@@ -80,8 +83,11 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
                 lbl = f'$\\phi = {composition}$'
             plt.vlines([composition], ymin=sigma_min/10, ymax=sigma_max*10, linewidth=5, color=color, alpha=0.5, label=lbl)
 
+    phi_dst = np.min(phi_dst)
+    plt.axvline(phi_dst, linestyle='--', color='0.5')
     plt.axvline(phi_m, linestyle='--', color='0.3')
     plt.axvline(phi_o, linestyle='--', color='0.3')
+    plt.text(phi_dst*1.01, 2*sigma_min, '$\\phi_{dst}$', ha='left')
     plt.text(phi_m*1.01, 2*sigma_min, '$\\phi_m$', ha='left')
     plt.text(phi_o*1.01, 2*sigma_min, '$\\phi_o$', ha='left')
     plt.xlabel(r'Volume Fraction, $\phi$')
@@ -95,25 +101,9 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
     #         f'${conc}_m = {phi_m}$\n'+
     #         f'${conc}_o = {phi_o}$',
     #         ha='center',va='center', bbox=dict(edgecolor='gray',facecolor='white'))
-    plt.text(
-            lowphi + (0.3*(phi_m - lowphi)),
-            np.power(sigma_max - sigma_min, 0.3),
-            '\\centering Continuous Shear\\\\Thickening\\\\',
-            ha='center',
-            va='center')
-    plt.text(
-            phi_o + np.max([(0.5*(highphi - phi_o)), xlim_off/2]),
-            np.power(sigma_max - sigma_min,0.3),
-            'Jammed',
-            ha='center',
-            color='red')
-    plt.text(
-            phi_m + (0.5*(phi_o - phi_m)),
-            np.nanmean(sigma_jam),
-            'Shear Jammed',
-            color='C1',
-            ha='center',
-            va='center')
+    plt.text(*cst_label_pos, cst_label, transform=plt.gca().transAxes, **cst_label_kwargs)
+    plt.text( *sj_label_pos,  sj_label, transform=plt.gca().transAxes,  **sj_label_kwargs, color='C1')
+    plt.text(  *j_label_pos,   j_label, transform=plt.gca().transAxes,   **j_label_kwargs, color='red')
     # plt.text(
     #         phi_m + (0.5*(phi_o - phi_m)),
     #         np.nanmean(sigma_jam_transition),
