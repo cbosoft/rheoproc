@@ -54,3 +54,30 @@ def moving_average(v, w, *, avf=None):
         end = end if end < (l-1) else (l-1)
         rv[i] = avf(v[start:end])
     return rv
+
+
+def moving_weighted_average(v, window):
+
+    assert isinstance(window, list)
+    assert len(window) % 2 == 1
+
+    half_window = int((len(window) - 1) // 2)
+
+    l = len(v)
+    rv = np.zeros(l)
+    for i in range(len(v)):
+        start = i - half_window
+        wi = window
+
+        if start < 0:
+            wi = wi[-start:]
+            start = 0
+
+        end = i + half_window + 1
+        if end > l-1:
+            e = l-1-end
+            wi = wi[:e]
+            end = l-1
+
+        rv[i] = np.sum(np.multiply(v[start:end], wi))
+    return rv
