@@ -7,10 +7,11 @@ def apply_fit(fitx, coeffs):
     return fity
 
 
-def fit(x, y, d, return_label=False, xname='x', yname='y', return_func=False):
+def fit(x, y, d, return_label=False, xname='x', yname='y', return_func=False, fitx=None):
     coeffs = np.polyfit(x, y, d)
 
-    fitx = np.sort(x)
+    if fitx is None:
+        fitx = np.sort(x)
     fity = apply_fit(fitx, coeffs)
 
     rv = [fitx, fity]
