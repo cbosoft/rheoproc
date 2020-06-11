@@ -30,3 +30,7 @@ class CategoryError(Exception):
 
 class DataUnavailableError(Exception):
     '''The data you requested is missing in the original log file and therefore cannot be obtained.'''
+
+
+class NaNError(Exception):
+    '''A NaN was encountered where there should be a number.'''

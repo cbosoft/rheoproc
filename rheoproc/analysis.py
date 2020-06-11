@@ -1,5 +1,6 @@
 import numpy as np
 
+from rheoproc.exception import NaNError
 
 def xcorr(sl, sr):
     '''
@@ -15,6 +16,10 @@ def xcorr(sl, sr):
     For more information, see stack exchange answer on this topic:
     https://dsp.stackexchange.com/questions/22877/intuitive-explanation-of-cross-correlation-in-frequency-domain
     '''
+
+    if np.any(np.isnan(sl)) or np.any(np.isnan(sr)):
+        raise NaNError('xcorr can\'t handle NaN in input: use strip before xcorr.')
+
     slq = np.fft.fft(sl)
     srqc = np.conjugate(np.fft.fft(sr))
     crosscorr = np.fft.ifft(np.multiply(slq, srqc))
