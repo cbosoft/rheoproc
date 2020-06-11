@@ -2,7 +2,9 @@ import numpy as np
 
 from rheoproc.exception import NaNError
 
-def xcorr(sl, sr):
+
+
+def xcorr(sl, sr, dt=None, norm=True):
     '''
 
     Cross correlation of two signals is given by the fourier transform of one,
@@ -15,6 +17,9 @@ def xcorr(sl, sr):
 
     For more information, see stack exchange answer on this topic:
     https://dsp.stackexchange.com/questions/22877/intuitive-explanation-of-cross-correlation-in-frequency-domain
+
+    If a dt keyword is supplied, then the lag axis is found and the data is
+    sorted by increasing lag.
     '''
 
     if np.any(np.isnan(sl)) or np.any(np.isnan(sr)):
@@ -22,7 +27,21 @@ def xcorr(sl, sr):
 
     slq = np.fft.fft(sl)
     srqc = np.conjugate(np.fft.fft(sr))
-    crosscorr = np.fft.ifft(np.multiply(slq, srqc))
+    crosscorr = np.fft.ifft(np.multiply(slq, srqc))[1:]
+
+    if norm:
+        crosscorr = np.divide(np.subtract(crosscorr, np.min(crosscorr)), np.max(crosscorr) - np.min(crosscorr))
+
+    if dt is not None:
+        l = len(crosscorr)
+        hl = l/2 if l%2 == 0 else (l+1)/2
+        hl = int(hl)
+        left = np.linspace(0, hl*dt*4, hl)
+        right = np.linspace(-1*hl*dt*4, 0, hl)[1:]
+        lag = [*left, *right]
+        lag, crosscorr = zip(*list(sorted(zip(lag, crosscorr))))
+        return lag, crosscorr
+
     return crosscorr
 
 
