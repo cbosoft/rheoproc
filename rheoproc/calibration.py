@@ -27,7 +27,15 @@ CALIBRATIONS = [
         'LC_z': 868008998.7095627,
         'k_oM': -0.0010503586253458334,
         'M_fz': 68.56278788864951
-    }
+    },
+    {
+        'type': 'model_feb20',
+        'valid_from': dt.strptime("2020-01-02", "%Y-%M-%d"),
+        'k_Mlc': 5.6178948366865e-08,
+        'LC_z': 2147459107.7170305,
+        'k_oM': -0.001034085552292223,
+        'M_fz': 0.0
+    },
 ]
 
 CAL_STR = 'lambda loadcell, speed: np.subtract(np.divide(np.subtract(loadcell, 2147404172.2268088), 5830725.190810496), np.multiply(0.00024102884334720187, np.power(speed, 0.723770242690987)))'
