@@ -21,7 +21,7 @@ def filt(t, v, freq=10, order=10, bt='low'):
 
 def strip(*args, f):
     '''
-    remove a row of data from *args, where each arg is a column, if filter 
+    remove a row of data from *args, where each arg is a column, if filter
     function f of the row is false. (rows where f evaluates truthy are kept.)
 
     The args should all be the same length.
