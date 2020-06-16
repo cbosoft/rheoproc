@@ -127,30 +127,16 @@ def load_from_cache(key):
     return o
 
 
-def diskcache(thisfile):
+def diskcache(thisfile=None, **cache_kwargs):
     def decorator(f):
         def decorated_f(*args, **kwargs):
             key = f'{thisfile} {args} {kwargs}'
             val = load_from_cache(key)
             if val is None:
                 rv = f(*args, **kwargs)
-                save_to_cache(key, rv, depends_on=thisfile)
+                save_to_cache(key, rv, depends_on=thisfile, **cache_kwargs)
                 return rv
             else:
                 return val
         return decorated_f
     return decorator
-
-
-
-
-
-
-
-
-
-
-
-
-
-
