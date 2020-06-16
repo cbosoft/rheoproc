@@ -2,7 +2,7 @@ import os
 import inspect
 import importlib
 
-def get_data_loader():
+def get_data():
     n = inspect.stack()[1].filename
     n = os.path.basename(n)
     n = n.replace('fig_', 'data_')
@@ -18,5 +18,4 @@ def get_data_loader():
     except Exception as e:
         raise ImportError(f'No load_data function found in \'{n}.py\'.') from e
 
-    return load_data
-
+    return load_data()
