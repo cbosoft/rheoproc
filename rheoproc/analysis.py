@@ -1,10 +1,27 @@
+import warnings
+
 import numpy as np
 
 from rheoproc.exception import NaNError
 
 
+def get_lag(t):
+    lags = np.cumsum(np.diff(t))
 
-def xcorr(sl, sr, dt=None, norm=True):
+    l = len(t)
+    if l%2 == 1:
+        hl = int(len(lags)//2)
+        mid2 = lags[hl:hl+2]
+        dl = (mid2[1] - mid2[0])*0.5
+        for i in range(hl):
+            lags[i] = lags[i] + dl
+        for i in range(hl,len(lags)):
+            lags[i] = lags[i] - dl
+    lags = np.subtract(lags, np.median(lags))
+    return lags
+
+
+def xcorr(sl, sr, norm=True, real=True):
     '''
 
     Cross correlation of two signals is given by the fourier transform of one,
@@ -17,9 +34,6 @@ def xcorr(sl, sr, dt=None, norm=True):
 
     For more information, see stack exchange answer on this topic:
     https://dsp.stackexchange.com/questions/22877/intuitive-explanation-of-cross-correlation-in-frequency-domain
-
-    If a dt keyword is supplied, then the lag axis is found and the data is
-    sorted by increasing lag.
     '''
 
     if np.any(np.isnan(sl)) or np.any(np.isnan(sr)):
@@ -29,18 +43,21 @@ def xcorr(sl, sr, dt=None, norm=True):
     srqc = np.conjugate(np.fft.fft(sr))
     crosscorr = np.fft.ifft(np.multiply(slq, srqc))[1:]
 
+    if real:
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=np.ComplexWarning)
+            crosscorr = np.real(crosscorr)
+
     if norm:
         crosscorr = np.divide(np.subtract(crosscorr, np.min(crosscorr)), np.max(crosscorr) - np.min(crosscorr))
 
-    if dt is not None:
-        l = len(crosscorr)
-        hl = l/2 if l%2 == 0 else (l+1)/2
-        hl = int(hl)
-        left = np.linspace(0, hl*dt*4, hl)
-        right = np.linspace(-1*hl*dt*4, 0, hl)[1:]
-        lag = [*left, *right]
-        lag, crosscorr = zip(*list(sorted(zip(lag, crosscorr))))
-        return lag, crosscorr
+    # the crosscorr is a little mixed up. We want zero lag to be in the middle
+    l = len(crosscorr)
+    hl = int(l//2)
+    if l % 2 == 1:
+        crosscorr = [*crosscorr[hl:],*crosscorr[1:hl+1]]
+    else:
+        crosscorr = [*crosscorr[hl:],*crosscorr[:hl]]
 
     return crosscorr
 
