@@ -24,6 +24,7 @@ import rheoproc.nansafemath as ns
 from rheoproc.software_versions import SW_VER_COMPLETE_LOG
 from rheoproc.hardware_versions import HW_VER_PND_MONO, HW_VER_PND_SPLIT
 from rheoproc.pnd import pnd_recombine
+from rheoproc.rationalise import rat_times
 
 
 OPTENC_LOG_RE = re.compile(r'^(logs/)?rpir_.*_.*_opt(\d*)-(.*)\.csv$')
@@ -230,6 +231,8 @@ class RheometerLog(GenericLog):
         viscosity = ns.divide(stress, strainrate)
         expected_viscosity = get_material_viscosity(self.material, np.array(temperature, dtype=np.float64))
         if not quiet: timestamp('--> done')
+
+        loadcell, stress, viscosity, expected_viscosity, strainrate, pnd, speed, load_torque, temperature, ambient_temperature, adc, time, raw_time = rat_times(loadcell, stress, viscosity, expected_viscosity, strainrate, pnd, speed, load_torque, temperature, ambient_temperature, adc, time, raw_time)
 
         data = {
             'rheology': {
