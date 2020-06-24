@@ -2,6 +2,7 @@ import numpy as np
 from scipy import signal
 
 from rheoproc.accelproc import moving_mean as accel_moving_mean
+from rheoproc.error import warning
 
 
 def filt(t, v, freq=10, order=10, bt='low'):
@@ -14,6 +15,9 @@ def filt(t, v, freq=10, order=10, bt='low'):
         w = [f/(sample_freq*0.5) for f in freq]
     else:
         w = freq / (sample_freq * 0.5)
+    if w >= 1.0:
+        warning("filter freq out of range: not applying filter")
+        return v
     b, a = signal.butter(order, w, btype=bt)
     output = signal.filtfilt(b, a, v)
     return output
