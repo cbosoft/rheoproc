@@ -129,7 +129,7 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
     plt.xlim(left=lowphi-xlim_off, right=highphi+xlim_off)
     plt.ylim(bottom=sigma_min, top=sigma_max)
     if legend and compositions:
-        plt.legend(loc='center', bbox_to_anchor=(0.5, -.3, 0.0, 0.0), ncol=(len(compositions)//2)+1)
+        plt.legend(loc='center', bbox_to_anchor=(0.5, 1.3, 0.0, 0.0), ncol=(len(compositions)//2)+1)
 
 
     if 'rho_cs' in kwargs.keys():
