@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.interpolate import interp1d
 
 def rec_choose(vec, indices):
     '''recursive application of np.choose'''
@@ -29,3 +30,17 @@ def rat_times(k, *vectors):
             raise e
 
     return tuple(rv)
+
+def recreate(t, lc, *vs, kind='cubic'):
+    ltvp = rat_times(lc, t, *vs)
+    lp = ltvp[0]
+    tp = ltvp[1]
+    vps = ltvp[2:]
+
+    rv = list()
+    for vp in vps:
+        v = interp1d(tp, vp, kind=kind, fill_value='extrapolate')(t)
+        rv.append(v)
+    if len(rv) == 1:
+        rv = rv[0]
+    return rv
