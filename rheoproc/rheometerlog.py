@@ -198,7 +198,10 @@ class RheometerLog(GenericLog):
             print("Log is TSTS log?") # TODO check and work around this
             sys.exit(1)
 
-        loadcell = recreate(time, loadcell, loadcell)
+        try:
+            loadcell = recreate(time, loadcell, loadcell)
+        except:
+            loadcell = recreate(time, loadcell, loadcell, kind='linear')
 
         if len(dat) > 12:
             ambient_temperature = dat[12]
