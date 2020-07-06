@@ -15,8 +15,11 @@ class ProgressBar:
         if i is None:
             i = self.pos + 1
 
+        frac = ''
         mem_gb = this_proc_mem_gb()
-        frac = f'▌{mem_gb:.1f} GB▐▌{i+1}/{self.length}▐'
+        if mem_gb > 0:
+            frac += f'▌{mem_gb:.1f} GB▐'
+        frac += f'▌{i+1}/{self.length}▐'
         timestamp_ex = "  (10/30/19 15:57:02.659921) "
         columns = int(columns) - len(frac) - len(timestamp_ex)
         col_per_i = columns / self.length
