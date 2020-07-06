@@ -117,13 +117,13 @@ class RheometerLog(GenericLog):
             elif 'depth_mm' in run_params:
                 self.fill_depth = run_params['depth_mm']
             else:
-                warning('legacy log: no fill depth information available (using default of 73)')
+                # warning('legacy log: no fill depth information available (using default of 73)')
                 self.fill_depth = 73.0
 
             if 'needle_depth_mm' in run_params:
                 self.needle_depth =  run_params['needle_depth_mm']
             else:
-                warning('legacy log: no needle depth information available')
+                pass #warning('legacy log: no needle depth information available')
 
             for member in tarlog.getmembers():
                 if OPTENC_LOG_RE.match(member.name):
