@@ -110,3 +110,7 @@ def is_between(v, mn, mx):
         return all([is_between(vi, mn, mx) for vi in v])
     except:
         return mn <= v <= mx
+
+def is_mac():
+    import platform
+    return platform.system() == 'Darwin'
