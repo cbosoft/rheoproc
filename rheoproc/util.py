@@ -93,7 +93,10 @@ def runsh(command, output='stdout'):
 def this_proc_mem_gb():
     pid = os.getpid()
     #children = [int(child_pid) for child_pid in runsh(f'pgrep -P {pid}')[:-1]]
-    total_memkb = int(runsh(f'cat /proc/{pid}/status | grep VmSize | awk \'{{print $2}}\'')[0])
+    try:
+        total_memkb = int(runsh(f'cat /proc/{pid}/status | grep VmSize | awk \'{{print $2}}\'')[0])
+    except:
+        total_memkb = -1
     # for child_pid in children:
     #     child_memkb = runsh(f'cat /proc/{child_pid}/status | grep VmSize | awk \'{{print $2}}\'')[0]
     #     if child_memkb:
