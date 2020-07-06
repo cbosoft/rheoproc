@@ -3,3 +3,4 @@ tags
 *.pyc
 build
 *.egg-info
+*.un~
