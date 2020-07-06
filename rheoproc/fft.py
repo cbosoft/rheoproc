@@ -10,6 +10,9 @@ def fft(t, *ys, regularise=True, chunks=1):
     dt = np.average(np.diff(t))
 
     t_and_ys = strip(t, *ys, f=lambda r: not np.isnan(r[1]))
+    if not len(t_and_ys):
+        raise Exception("all res are nans")
+
     t = t_and_ys[0]
     ys = t_and_ys[1:]
 
@@ -29,13 +32,14 @@ def fft(t, *ys, regularise=True, chunks=1):
         y = np.average(ys, axis=0)
         fft_y = np.fft.fft(y)
         if regularise:
-            fft_y = np.abs(fft_y)[1:]
+            fft_y = np.power(np.real(fft_y), 2.0)
         fft_ys.append(fft_y)
 
 
     fft_x = np.fft.fftfreq(len(y), d=dt)
     if regularise:
-        fft_x = np.abs(fft_x)[1:]
+        fft_x = np.abs(fft_x)
+        fft_x[0] = np.nan
 
     if len(fft_ys) > 1:
         return fft_x, fft_ys

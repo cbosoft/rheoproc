@@ -20,5 +20,8 @@ def stress_label(units='Pa'):
 def viscosity_label(units=r'Pa\,s'):
     return fmt_lbl('Viscosity', '\\mu', units)
 
-def time_label(units=r's'):
+def time_label(units='s'):
     return fmt_lbl('Time', 't', units)
+
+def freq_label(units='Hz', symbol='\\omega'):
+    return fmt_lbl('Frequency', symbol, units)
