@@ -150,7 +150,10 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     processed_results = dict()
     order = [r['ID'] for r in results]
 
-    processes = int(runsh('nproc')[0])
+    try:
+        processes = int(runsh('nproc')[0])
+    except:
+        processes = 4
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
