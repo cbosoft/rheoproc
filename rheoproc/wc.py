@@ -80,7 +80,7 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
             if names:
                 lbl = names[i]
             else:
-                lbl = f'$\\phi = {composition}$'
+                lbl = f'$\\phi = {composition:.2f}$'
             plt.vlines([composition], ymin=sigma_min/10, ymax=sigma_max*10, linewidth=5, color=color, alpha=0.5, label=lbl)
 
     phi_dst = np.min(phi_dst)
