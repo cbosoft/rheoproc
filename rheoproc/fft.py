@@ -38,7 +38,8 @@ def fft(t, *ys, regularise=True, chunks=1):
 
     fft_x = np.fft.fftfreq(len(y), d=dt)
     if regularise:
-        fft_x = np.abs(fft_x)[1:]
+        fft_x = np.abs(fft_x)
+        fft_x[0] = np.nan
 
     if len(fft_ys) > 1:
         return fft_x, fft_ys
