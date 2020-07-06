@@ -10,6 +10,9 @@ def fft(t, *ys, regularise=True, chunks=1):
     dt = np.average(np.diff(t))
 
     t_and_ys = strip(t, *ys, f=lambda r: not np.isnan(r[1]))
+    if not len(t_and_ys):
+        raise Exception("all res are nans")
+
     t = t_and_ys[0]
     ys = t_and_ys[1:]
 
