@@ -32,7 +32,7 @@ def fft(t, *ys, regularise=True, chunks=1):
         y = np.average(ys, axis=0)
         fft_y = np.fft.fft(y)
         if regularise:
-            fft_y = np.abs(fft_y)[1:]
+            fft_y = np.power(np.real(fft_y), 2.0)
         fft_ys.append(fft_y)
 
 
