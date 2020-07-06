@@ -9,7 +9,7 @@ from rheoproc.exception import TooManyResultsError, QueryError
 from rheoproc.progress import ProgressBar
 from rheoproc.cache import load_from_cache, save_to_cache
 from rheoproc.sql import execute_sql
-from rheoproc.util import runsh, get_hostname
+from rheoproc.util import runsh, get_hostname, is_mac
 from rheoproc.error import timestamp
 
 
@@ -154,10 +154,16 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
-    with mp.Pool(processes=processes) as pool:
-        for r in pool.imap_unordered(async_get, [tuple([ tuple([dict(res), data_dir]), kwargs]) for res in results]):
+    if is_mac():
+        for res in results:
+            r = async_get(((dict(res), data_dir), kwargs))
             pb.update()
             processed_results[r.ID] = r
+    else:
+        with mp.Pool(processes=processes) as pool:
+            for r in pool.imap_unordered(async_get, [( (dict(res), data_dir), kwargs) for res in results]):
+                pb.update()
+                processed_results[r.ID] = r
 
     timestamp('Sorting')
     for ID in order:
