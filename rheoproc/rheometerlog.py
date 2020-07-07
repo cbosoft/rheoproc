@@ -199,9 +199,10 @@ class RheometerLog(GenericLog):
             sys.exit(1)
 
         try:
-            loadcell = recreate(time, loadcell, loadcell)
-        except:
             loadcell = recreate(time, loadcell, loadcell, kind='linear')
+        except Exception as e:
+            #loadcell = recreate(time, loadcell, loadcell, kind='linear')
+            raise e
 
         if len(dat) > 12:
             ambient_temperature = dat[12]
