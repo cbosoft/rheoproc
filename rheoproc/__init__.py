@@ -30,6 +30,7 @@ modules_check()
 
 import atexit
 def closing_message():
+    from rheoproc.error import timestamp
     timestamp(f'done!')
 
 atexit.register(closing_message)
@@ -54,4 +55,3 @@ from rheoproc.error import timestamp, warning
 from rheoproc.version import version
 
 timestamp(f'rheoproc {version} initialised')
-
