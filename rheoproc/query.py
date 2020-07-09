@@ -10,7 +10,7 @@ from rheoproc.progress import ProgressBar
 from rheoproc.cache import load_from_cache, save_to_cache
 from rheoproc.sql import execute_sql
 from rheoproc.util import runsh, get_hostname, is_mac
-from rheoproc.error import timestamp
+from rheoproc.error import timestamp, warning
 
 
 ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
@@ -160,14 +160,16 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
-    if is_mac():
-        for res in results:
-            r = async_get(((dict(res), data_dir), kwargs))
+    list_of_args_kwargs = [( (dict(res), data_dir), kwargs) for res in results]
+    if processes == 1:
+        warning('Only using one core: this could take a while.')
+        for a_kw in list_of_args_kwargs:
+            r = async_get(a_kw)
             pb.update()
             processed_results[r.ID] = r
     else:
         with mp.Pool(processes=processes) as pool:
-            for r in pool.imap_unordered(async_get, [( (dict(res), data_dir), kwargs) for res in results]):
+            for r in pool.imap_unordered(async_get, list_of_args_kwargs):
                 pb.update()
                 processed_results[r.ID] = r
 
