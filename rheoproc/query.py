@@ -151,7 +151,10 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     order = [r['ID'] for r in results]
 
     try:
-        processes = int(runsh('nproc')[0])
+        if is_mac():
+            processes = int(runsh('sysctl -n hw.ncpu')[0])
+        else:
+            processes = int(runsh('nproc')[0])
     except:
         processes = 4
     timestamp(f'processing {len(results)} logs over {processes} processes.')
