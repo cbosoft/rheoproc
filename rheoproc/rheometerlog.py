@@ -198,6 +198,9 @@ class RheometerLog(GenericLog):
             print("Log is TSTS log?") # TODO check and work around this
             sys.exit(1)
 
+        lco_v, lco_t = rat_times(loadcell, time)
+        self.stress_samplerate = 1./np.average(np.diff(lco_t))
+        self.samplerate = 1./np.average(np.diff(time))
         try:
             loadcell = recreate(time, loadcell, loadcell, kind='linear')
         except Exception as e:
