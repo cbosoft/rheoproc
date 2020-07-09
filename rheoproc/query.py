@@ -156,7 +156,7 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
         else:
             processes = int(runsh('nproc')[0])
     except:
-        processes = 4
+        processes = 1
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
