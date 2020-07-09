@@ -95,6 +95,7 @@ class RheometerLog(GenericLog):
         
         encoders = list()
         photos = list()
+        run_params = dict()
 
         try:
             with tarfile.open(self.path, 'r:*') as tarlog:
