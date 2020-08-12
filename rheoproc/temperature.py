@@ -1,6 +1,6 @@
 import numpy as np
 
-from rheoproc.viscosity import get_material_heatcapacity
+from rheoproc.viscosity import get_material_heatcapacity, get_density_material
 
 def get_predicted_temperature(log):
     P = np.multiply(log.speed, log.load_torque)
