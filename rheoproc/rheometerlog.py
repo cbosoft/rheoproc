@@ -336,6 +336,23 @@ class RheometerLog(GenericLog):
         except IndexError:
             return -1
 
+    def get_annular_area(self):
+        rin = self.geometry['RIN']
+        rout = self.geometry['ROUT']
+        return (rout*rout - rin*rin)*np.pi
+
+    def get_volume(self, unit='m3'):
+        V_l = self.fill_depth*self.get_annular_area()
+
+        if unit == 'm3':
+            return V_l*0.001
+
+        if unit == 'l':
+            return V_l
+
+        raise Exception(f'Unknown volume unit {unit} (valid units are "l" or "m3")')
+        
+
 
 ### I don't think this is useful
 ## class RawRheometerLog(RheometerLog):
