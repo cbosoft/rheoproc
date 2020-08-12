@@ -99,7 +99,7 @@ class TempTSLogPlotter(TSLogPlotter):
     
     def plot(self, log):
         x, y = super().plot(log)
-        ma = moving_average(y, 1000)
+        ma = moving_average(y, 10000)
         plt.plot(x, ma, '--')
 
         trise = get_predicted_temperature(log)
