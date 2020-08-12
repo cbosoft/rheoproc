@@ -32,6 +32,10 @@ class VariablePropertiesLog:
     @property
     def speed(self):
         return self.get('speed')
+
+    @property
+    def load_torque(self):
+        return self.get('load_torque')
     
     @property
     def speed_av(self):
