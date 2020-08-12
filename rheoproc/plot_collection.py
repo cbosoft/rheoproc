@@ -133,6 +133,11 @@ class StressFFTLogPlotter(FFTLogPlotter):
         y_func = lambda log: get_ffty(log.time, log.stress)
         ylabel = None
         super().__init__(y_func=y_func, ylabel=ylabel)
+    
+    def plot(self, log):
+        x, y = super().plot(log)
+        plt.axvline(log.stress_samplerate*0.5, color='red')
+        return x, y
 
 
 class StrainrateFFTLogPlotter(FFTLogPlotter):
