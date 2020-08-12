@@ -81,6 +81,8 @@ class ViscosityTSLogPlotter(TSLogPlotter):
         y_func = lambda log: log.viscosity
         ylabel = viscosity_label()
         super().__init__(y_func=y_func, ylabel=ylabel)
+
+class ViscosityTempTSLogPlotter(ViscosityTSLogPlotter):
     
     def plot(self, log):
         x, y = super().plot(log)
