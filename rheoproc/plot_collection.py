@@ -183,10 +183,10 @@ class PlotCollection:
         self.logplotters = logplotters
 
 
-    def _get_letters(self, parens=False, case='upper', **kwargs):
+    def _get_letters(self, parens=False, case='upper', letters_start=0, **kwargs):
         letter_base = string.ascii_lowercase if case == 'lower' else string.ascii_uppercase
         parens = ('(', ')') if parens else ('', '')
-        return [f'{parens[0]}{a}{parens[1]}' for a in letter_base]
+        return [f'{parens[0]}{a}{parens[1]}' for a in letter_base][letters_start:]
 
     def plot_log(self, log, hspc=0.12, vspc=0.1, ax_width=0.4, ax_height=0.3):
         l = len(self.logplotters)
