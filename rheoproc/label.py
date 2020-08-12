@@ -28,3 +28,7 @@ def time_label(units='s'):
 
 def freq_label(units='Hz', symbol='\\omega'):
     return fmt_lbl('Frequency', symbol, units)
+
+def ffty_label(units=None, symbol=None):
+    # TODO
+    return None
