@@ -20,6 +20,9 @@ def stress_label(units='Pa'):
 def viscosity_label(units=r'Pa\,s'):
     return fmt_lbl('Viscosity', '\\mu', units)
 
+def temperature_label(units='K'):
+    return fmt_lbl('Temperature', 'T', units)
+
 def time_label(units='s'):
     return fmt_lbl('Time', 't', units)
 
