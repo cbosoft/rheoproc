@@ -3,11 +3,38 @@ import numpy as np
 
 from rheoproc.filter import strip
 
-def fft(t, *ys, regularise=True, chunks=1):
-    ''' returns the x- and y-data for the fast fourier transform of given timeseries (t,y).'''
+def get_fftx(t, regularise=True, chunks=1, **kwargs):
+    l = len(t) // chunks
+    dt = np.mean(np.diff(t))
+    fft_x = np.fft.fftfreq(l, d=dt)
+    if regularise:
+        fft_x = np.abs(fft_x)
+        fft_x[0] = np.nan
+    return fft_x
 
-    t = np.array(t, dtype=np.float64)
-    dt = np.average(np.diff(t))
+
+def get_ffty(t, y, regularise=True, chunks=1, trim_baseline=True):
+
+    if trim_baseline:
+        (m, c) = np.polyfit(t, y, 1)
+        bfline = np.add(np.multiply(t, m), c)
+        y = np.subtract(y, bfline)
+
+    chunklen = len(y)//chunks
+    ys = list()
+    for i in range(chunks):
+        ys.append(y[chunklen*i:chunklen*(i+1)])
+    ys = np.array(ys, dtype=np.float64)
+    y = np.average(ys, axis=0)
+    fft_y = np.fft.fft(y)
+    if regularise:
+        fft_y = np.power(np.real(fft_y), 2.0)
+    return fft_y
+
+
+
+def fft(t, *ys, **kwargs):
+    ''' returns the x- and y-data for the fast fourier transform of given timeseries (t,y).'''
 
     t_and_ys = strip(t, *ys, f=lambda r: not np.isnan(r[1]))
     if not len(t_and_ys):
@@ -16,30 +43,8 @@ def fft(t, *ys, regularise=True, chunks=1):
     t = t_and_ys[0]
     ys = t_and_ys[1:]
 
-    fft_ys = list()
-    for y in ys:
-        y = np.array(y, dtype=np.float64)
-        (m, c) = np.polyfit(t, y, 1)
-
-        bfline = np.add(np.multiply(t, m), c)
-        y = np.subtract(y, bfline)
-
-        chunklen = len(y)//chunks
-        ys = list()
-        for i in range(chunks):
-            ys.append(y[chunklen*i:chunklen*(i+1)])
-        ys = np.array(ys, dtype=np.float64)
-        y = np.average(ys, axis=0)
-        fft_y = np.fft.fft(y)
-        if regularise:
-            fft_y = np.power(np.real(fft_y), 2.0)
-        fft_ys.append(fft_y)
-
-
-    fft_x = np.fft.fftfreq(len(y), d=dt)
-    if regularise:
-        fft_x = np.abs(fft_x)
-        fft_x[0] = np.nan
+    fft_ys = [get_ffty(t, y, **kwargs) for y in ys]
+    fft_x = get_fftx(t, **kwargs)
 
     if len(fft_ys) > 1:
         return fft_x, fft_ys
