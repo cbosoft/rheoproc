@@ -26,8 +26,18 @@ def get_density_glycerol_water_mix(T, Cm):
     rhow = get_density_water(T)
     return np.add(np.multiply(Cm, rhog), np.multiply(np.subtract(1, Cm), rhow))
 
+def get_density_material(material, T):
 
+    match = GLYCEROL_RE.match(material)
+    if match:
+        return get_viscosity_glycerol(T)
 
+    match = GW_RE.match(material)
+    if match:
+        RG, RW = match.groups()
+        Cm = float(RG) / (float(RG) + float(RW))
+        return get_viscosity_glycerol_water_mix(T, Cm)
+    raise Exception(f'unknown material: {material}')
 
 
 def get_viscosity_glycerol(T):
@@ -100,3 +110,25 @@ def get_material_viscosity(material, T):
         return np.full(np.shape(T), 0.0)
 
     return np.full(np.shape(T), -1.0)
+
+
+
+def get_material_heatcapacity(material):
+    '''
+    Get heat hapacity for glycerol mixtures in j/g•K
+    '''
+    
+    CP_GLYCEROL = 2.43
+    CP_WATER = 4.2
+    
+    match = GLYCEROL_RE.match(material)
+    if match:
+        return 2.43
+
+    match = GW_RE.match(material)
+    if match:
+        RG, RW = match.groups()
+        Cm = float(RG) / (float(RG) + float(RW))
+        return (Cm*CP_GLYCEROL) + ( (1.0 - Cm)*CP_WATER) 
+
+    raise Exception(f'No heat capacity data for material: {material}')
