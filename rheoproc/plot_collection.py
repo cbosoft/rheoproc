@@ -116,6 +116,13 @@ class FFTLogPlotter(LogPlotter):
         x_func = lambda log: get_fftx(log.time)
         xlabel = freq_label()
         super().__init__(x_func=x_func, xlabel=xlabel, **kwargs)
+    
+    def plot(self, log):
+        x, y = super().plot(log)
+        plt.xscale('log')
+
+        return x, y
+
 
 
 class StressFFTLogPlotter(FFTLogPlotter):
