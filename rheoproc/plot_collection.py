@@ -121,6 +121,8 @@ class FFTLogPlotter(LogPlotter):
         x, y = super().plot(log)
         plt.xscale('log')
 
+        rot_hz = np.mean(log.speed)
+        plt.axvline(rot_hz, ls='--', color='orange')
         return x, y
 
 
