@@ -87,7 +87,9 @@ class ViscosityTempTSLogPlotter(ViscosityTSLogPlotter):
     def plot(self, log):
         x, y = super().plot(log)
         T = get_predicted_temperature(log)
+        emu = get_material_viscosity(log.material, log.temperature)
         pmu = get_material_viscosity(log.material, T)
+        plt.plot(x, emu)
         plt.plot(x, pmu)
         return x, y
 
@@ -181,6 +183,7 @@ class PlotCollection:
         self.title = title
         self.letters = self._get_letters(**kwargs)
         self.logplotters = logplotters
+        self.extra_plot_kwargs = kwargs
 
 
     def _get_letters(self, parens=False, case='upper', letters_start=0, **kwargs):
@@ -188,13 +191,13 @@ class PlotCollection:
         parens = ('(', ')') if parens else ('', '')
         return [f'{parens[0]}{a}{parens[1]}' for a in letter_base][letters_start:]
 
-    def plot_log(self, log, hspc=0.1, vspc=0.12, ax_width=0.4, ax_height=0.3):
+    def plot_log(self, log, hspc=0.1, vspc=0.12, ax_width=0.4, ax_height=0.3, **kwargs):
         l = len(self.logplotters)
         axes = [None]*l
 
-        total_width = hspc + ax_width + hspc
+        total_width = hspc + ax_width + hspc*0.5
         total_height = vspc + ax_height + vspc
-        border_width = total_width - hspc*0.5
+        border_width = total_width - hspc*0.25
         border_height = total_height*l + vspc
         dx = total_width * self.index
         for ax_index, logplotter in enumerate(self.logplotters):
@@ -206,7 +209,7 @@ class PlotCollection:
         
         self.fig.patches.extend([
             plt.Rectangle(
-                (dx, -0.5*hspc),
+                (dx, -0.5*vspc),
                 border_width,
                 border_height,
                 fc='none',
@@ -219,7 +222,7 @@ class PlotCollection:
         ])
         letter = self.letters[self.index]
         title = self.get_title(log)
-        plt.text(dx+0.05, total_height*l, f'\\huge \\textbf{{{letter}}}: {title}',
+        plt.text(dx + 0.25*hspc, total_height*l + 0.25*vspc, f'\\LARGE \\textbf{{{letter}}}: {title}',
             clip_on=False,
             transform=self.fig.transFigure,
             size='x-large',
@@ -232,7 +235,7 @@ class PlotCollection:
     
     def plot_logs(self, logs, plot_name=None, **kwargs):
         for log in logs:
-            self.plot_log(log, **kwargs)
+            self.plot_log(log, **self.extra_plot_kwargs, **kwargs)
         
         if plot_name:
             plt.savefig(plot_name)
