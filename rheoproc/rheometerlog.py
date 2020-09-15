@@ -191,7 +191,20 @@ class RheometerLog(GenericLog):
             pnd = np.array([])
 
         #ca = np.array(dat[9])
-        temperature = dat[10]
+        if 20200908 <= self.software_version <= 20200910:
+            warning(f'Logged using software ver {self.software_version} (between 20200908 and 20200910): fixing error in temp calc')
+            broken_temp = dat[10]
+            fixed_temp = np.zeros(len(broken_temp))
+            for i, vi in enumerate(broken_temp):
+                # fix misunderstood attempt to increase efficiency
+                v16 = int(vi*16.0)
+                lower = v16 & 127
+                upper = (v16 >> 8) & 255
+                v16nu = lower*16.0 + upper*0.0625
+                fixed_temp[i] = v16nu
+            temperature = fixed_temp
+        else:
+            temperature = dat[10]
 
         try:
             loadcell = dat[11]
