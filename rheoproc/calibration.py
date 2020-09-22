@@ -1,5 +1,7 @@
-from numpy import power
 from datetime import datetime as dt
+import json
+
+from numpy import power
 
 from rheoproc.sql import execute_sql
 import rheoproc.nansafemath as ns
@@ -10,7 +12,7 @@ def get_calibration(date):
 
     if calibration_row:
         cal_str = calibration_row[0]['DATA']
-        return eval(cal_str)
+        return json.loads(cal_str)
     else:
         raise Exception(f'No suitable calibration for log date {date} found!')
 
