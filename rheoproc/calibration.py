@@ -4,68 +4,23 @@ from datetime import datetime as dt
 from rheoproc.sql import execute_sql
 import rheoproc.nansafemath as ns
 
-CALIBRATIONS = [
-    {
-        'type': 'model',
-        'valid_from': dt.strptime("2019-08-01", "%Y-%M-%d"),
-        'LC_z' : 2147403964.8201435,
-        'k_Mlc' : 5943337.5848672595,
-        'k_fM' : 0.00024034388608895618
-    },
-    {
-        'type': 'model',
-        'valid_from': dt.strptime("2019-09-01", "%Y-%M-%d"),
-        'LC_z': 2147404172.2268088,
-        'k_Mlc': 5830725.190810496,
-        'k_fM': 0.00024102884334720187,
-        'n': 0.723770242690987
-    },
-    {
-        'type': 'model_feb20',
-        'valid_from': dt.strptime("2020-01-01", "%Y-%M-%d"),
-        'k_Mlc': 5.358774072092084e-08,
-        'LC_z': 868008998.7095627,
-        'k_oM': -0.0010503586253458334,
-        'M_fz': 68.56278788864951
-    },
-    {
-        'type': 'model_feb20',
-        'valid_from': dt.strptime("2020-01-02", "%Y-%M-%d"),
-        'k_Mlc': 5.6178948366865e-08,
-        'LC_z': 2147459107.7170305,
-        'k_oM': -0.001034085552292223,
-        'M_fz': 0.0
-    },
-]
+def get_calibration(date):
+    date = date.strftime('%Y%m%d')
+    calibration_row = execute_sql(f'SELECT * FROM [STRESS CALIBRATIONS] WHERE [VALID FROM] <= {date} ORDER BY [VALID FROM] DESC LIMIT 1;', database='../data/.database.db')
 
-CAL_STR = 'lambda loadcell, speed: np.subtract(np.divide(np.subtract(loadcell, 2147404172.2268088), 5830725.190810496), np.multiply(0.00024102884334720187, np.power(speed, 0.723770242690987)))'
-
-#CALIBRATION = {'type': 'model', 'LC_z': 2147404172.2002132, 'k_Mlc': 5830725.80830834, 'k_fM': 0.0002410294547234848}
-
-def get_calibration(log_row, database):
-    if row := log_row['LOADCELL CALIBRATION OVERRIDE']:
-        cal_str = row
+    if calibration_row:
+        cal_str = calibration_row[0]['DATA']
+        return eval(cal_str)
     else:
-        #experiment = log_row['EXPERIMENT']
-        #date = log_row['DATE']
-        calibration_row = execute_sql('SELECT * FROM CALIBRATIONS WHERE DATE<{date} AND EXPERIMENT="{experiment}" ORDER BY DATE DESC;', database)
-        cal_str = calibration_row['FUNCTION']
-    return eval(cal_str)
+        raise Exception(f'No suitable calibration for log date {date} found!')
 
 
 def apply_calibration(loadcell, speed, override_cal, date):
 
-    cal = None
     if override_cal:
         cal = override_cal
     else:
-        for CAL in CALIBRATIONS:
-            if date > CAL['valid_from']:
-                cal = CAL
-
-    if cal is None:
-        raise Exception("No suitable calibration for log date {date} found!")
-
+        cal = get_calibration(date)
 
     if cal['type'] == 'model':
         if 'n' not in cal:
