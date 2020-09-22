@@ -7,7 +7,10 @@ from rheoproc.sql import execute_sql
 import rheoproc.nansafemath as ns
 
 def get_calibration(date):
-    date = date.strftime('%Y%m%d')
+
+    if isinstance(date, dt):
+        date = date.strftime('%Y%m%d')
+
     calibration_row = execute_sql(f'SELECT * FROM [STRESS CALIBRATIONS] WHERE [VALID FROM] <= {date} ORDER BY [VALID FROM] DESC LIMIT 1;', database='../data/.database.db')
 
     if calibration_row:
