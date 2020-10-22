@@ -5,7 +5,7 @@ import multiprocessing as mp
 
 from rheoproc.combined import CombinedLogs
 from rheoproc.log import GuessLog, GuessLogType
-from rheoproc.exception import TooManyResultsError, QueryError
+from rheoproc.exception import GenericRheoprocException, TooManyResultsError, QueryError
 from rheoproc.progress import ProgressBar
 from rheoproc.cache import load_from_cache, save_to_cache
 from rheoproc.sql import execute_sql
@@ -106,11 +106,21 @@ def get_group(GROUP, database='../data/.database.db', Log=GuessLog, order_by=Non
 
 def async_get(args_and_kwargs):
     args, kwargs = args_and_kwargs
-    rv = GuessLog(*args, **kwargs)
+    try:
+        rv = GuessLog(*args, **kwargs)
+    except GenericRheoprocException as e:
+        if kwargs['ignore_exceptions']:
+            print('ignored exception')
+            print(e)
+            return None
+        else:
+            raise e
     return rv
 
 
-def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, **kwargs):
+def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, ignore_exceptions=False, **kwargs):
+
+    kwargs['ignore_exceptions'] = ignore_exceptions
 
     database = os.path.expanduser(database)
 
@@ -166,16 +176,24 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
         for a_kw in list_of_args_kwargs:
             r = async_get(a_kw)
             pb.update()
-            processed_results[r.ID] = r
+            if r:
+                processed_results[r.ID] = r
     else:
         with mp.Pool(processes=processes) as pool:
             for r in pool.imap_unordered(async_get, list_of_args_kwargs):
                 pb.update()
-                processed_results[r.ID] = r
+                if r:
+                    processed_results[r.ID] = r
 
     timestamp('Sorting')
     for ID in order:
-        rv.append(processed_results[ID])
+        try:
+            rv.append(processed_results[ID])
+        except Exception as e:
+            if ignore_exceptions:
+                pass
+            else:
+                raise e
 
     if len(types) == 1 and not plain_collection:
         processed_results = CombinedLogs(**kwargs)
