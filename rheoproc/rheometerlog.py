@@ -215,8 +215,12 @@ class RheometerLog(GenericLog):
         lco_v, lco_t = rat_times(loadcell, time)
         self.stress_samplerate = 1./np.average(np.diff(lco_t))
         self.samplerate = 1./np.average(np.diff(time))
+        self.recreated_loadcell = True
         try:
             loadcell = recreate(time, loadcell, loadcell, kind='linear')
+        except ValueError as ve:
+            print('loadcell can\'t be recreated: may be faulty!')
+            self.recreated_loadcell = False
         except Exception as e:
             #loadcell = recreate(time, loadcell, loadcell, kind='linear')
             raise e
