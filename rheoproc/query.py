@@ -118,6 +118,23 @@ def async_get(args_and_kwargs):
     return rv
 
 
+def get_n_processes():
+    system_processors = 0
+    if is_mac():
+        system_processors = int(runsh('sysctl -n hw.ncpu')[0])
+    else:
+        system_processors = int(runsh('nproc')[0])
+
+    n = system_processors
+    try:
+        if '--proc' in sys.argv:
+            n = int(sys.argv[sys.argv.index('--proc')+1])
+    except IndexError as e:
+        pass
+
+    return n
+
+
 def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, ignore_exceptions=False, **kwargs):
 
     kwargs['ignore_exceptions'] = ignore_exceptions
@@ -160,13 +177,8 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     processed_results = dict()
     order = [r['ID'] for r in results]
 
-    try:
-        if is_mac():
-            processes = int(runsh('sysctl -n hw.ncpu')[0])
-        else:
-            processes = int(runsh('nproc')[0])
-    except:
-        processes = 1
+    processes = get_n_processes()
+
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
