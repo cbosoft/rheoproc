@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 
 from rheoproc.accelproc import clean_optenc_events, speed_from_optenc_events
 from rheoproc.filter import moving_average
+from rheoproc.exception import ZeroSpeedError
 
 
 class OpticalEncoderLog:
@@ -36,11 +37,11 @@ class OpticalEncoderLog:
         Calculates the speed of rotation for the list of events held by this log.
         '''
         if any([e == 0.0 for e in self.events]):
-            raise Exception(f"Corrupt log (zero event found). {self.parent_log}")
+            raise ZeroSpeedError(f"Corrupt log (zero event found). {self.parent_log}")
 
         self.speed = speed_from_optenc_events(self.events)
         if any([s == 0.0 for s in self.speed]):
-            raise Exception(f"Corrupt speed calc (zero speed found). {self.parent_log}")
+            raise ZeroSpeedError(f"Corrupt speed calc (zero speed found). {self.parent_log}")
 
 
     def speed_in_alt_time(self, alt_time):
