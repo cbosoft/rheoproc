@@ -205,14 +205,18 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
             if ignore_exceptions:
                 pass
             else:
+                print(processed_results)
                 raise e
 
-    if len(types) == 1 and not plain_collection:
-        processed_results = CombinedLogs(**kwargs)
-        for log in rv:
-            processed_results.append(log)
-    else:
+    if plain_collection:
         processed_results = rv
+    else:
+        if len(types) == 1:
+            processed_results = CombinedLogs(**kwargs)
+            for log in rv:
+                processed_results.append(log)
+        else:
+            raise GenericRheoprocException('multiple log types not destined for plain collection')
 
     if caching:
         timestamp('Caching')
