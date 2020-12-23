@@ -79,7 +79,11 @@ class VariablePropertiesLog:
     @property
     def stress(self):
         return self.get('stress')
-    
+
+    @property
+    def strain(self):
+        return self.get('strain')
+
     @property
     def stress_av(self):
         return self.get('stress_av')
