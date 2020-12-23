@@ -2,6 +2,11 @@ import os
 import inspect
 import sys
 
+from rheoproc.util import is_mac
+
+if is_mac():
+    import matplotlib as mpl
+    mpl.use('macosx') # avoid tkinter issue on macOS 11.1 beta
 from matplotlib import pyplot
 
 from rheoproc.error import warning
