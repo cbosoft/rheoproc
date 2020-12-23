@@ -48,7 +48,7 @@ def fft(t, *ys, **kwargs):
 
     if len(fft_ys) > 1:
         return fft_x, fft_ys
-    return fft_x, fft_y
+    return fft_x, fft_ys[0]
 
 def psd(t, y):
     '''calculates the power-spectrum-density of a signal y in t using the FFT.'''
