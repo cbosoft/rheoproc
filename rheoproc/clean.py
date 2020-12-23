@@ -21,6 +21,9 @@ def clean_data(data, *, chop_first_seconds=0, strip_errors=False, acctdlib_lcfil
         #     for deli in todel:
         #         data[i].pop(deli)
         data = strip(*data, f=lambda row: all([not np.isnan(rowi) for rowi in row]))
+        if np.any(np.isnan(data)):
+            print('NAN AFTER STRIP :(')
+
 
     if chop_first_seconds:
         init_time = data[0][0]
