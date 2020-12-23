@@ -70,6 +70,7 @@ class RheometerLog(GenericLog):
         self.software_version = int(self.meta_data['SOFTWARE VERSION'])
         self.geometry = get_geometry(self.hardware_version)
         self.material = self.meta_data['MATERIAL']
+        self.motor = self.meta_data['MOTOR']
         self.ID = self.meta_data['ID']
         self.tags = self.meta_data['TAGS'].split(';')
         self.setpoint = self.meta_data['SETPOINT']
