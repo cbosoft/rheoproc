@@ -249,9 +249,19 @@ class RheometerLog(GenericLog):
 
         RIN = self.geometry['RIN']
         ROUT = self.geometry['ROUT']
-        gap = ROUT - RIN
+        # speed in rot/s, multiply by circumference to get m/s
         speed_ms = np.multiply(speed, 2.0*np.pi*RIN) # m/s
-        strainrate = np.divide(speed_ms, gap)
+
+        gap = ROUT - RIN
+        strainrate = np.divide(speed_ms, gap) # inverse seconds
+        # strainrate is calculated in inverse seconds (C/G/s) where C is circumference in m and G is gap size in m
+
+        strain = list()
+        dt = np.diff(time)
+        strain.append(np.average(dt) * strainrate[0])
+        for dti, gdi in zip(dt, strainrate[1:]):
+            strain.append(dti*gdi + strain[-1])
+        # strain is in C/Gs - unitless!
 
         load_torque = apply_calibration(loadcell, speed, self.override_calibration, self.date)
         stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*self.fill_depth))
@@ -266,6 +276,7 @@ class RheometerLog(GenericLog):
                 'expected_viscosity': (expected_viscosity, 'both'),
                 'strainrate': (strainrate, 'both'),
                 'stress': (stress, 'both'),
+                'strain': (strain, 'both'),
                 'pnd' : (pnd, 'none')
             },
             'intermediates': {
