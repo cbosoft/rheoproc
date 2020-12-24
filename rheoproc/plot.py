@@ -17,13 +17,18 @@ from rheoproc.error import timestamp
 
 def get_plot_name(subplot_name=None, ext='.pdf'):
     n = inspect.stack()[1].filename
+    loc = os.path.relpath(os.path.dirname(n), '.')
     n = os.path.basename(n).replace('.py', '')
 
     if subplot_name:
-        name = f'../img/{n}-{subplot_name}{ext}'
+        name = f'../img/{loc}/{n}-{subplot_name}{ext}'
     else:
-        name = f'../img/{n}{ext}'
+        name = f'../img/{loc}/{n}{ext}'
 
+    loc = os.path.dirname(name)
+    if not os.path.isdir(loc):
+        timestamp(f'Creating previously absent directory "{loc}"')
+        os.mkdir(loc)
     timestamp(f'Plotting "{name}"')
 
     return name
@@ -32,6 +37,7 @@ def get_plot_name(subplot_name=None, ext='.pdf'):
 
 def plot_init(*args, **kwargs):
     '''Legacy wrapper around matplotlib.'''
+
     return pyplot
 
 
