@@ -63,23 +63,23 @@ def is_number(s):
 
 def runsh(command, output='stdout'):
     
-    assert output in ['stdout', 'stderr', 'both']
+    assert output in ['stdout', 'stderr', 'both', 'none']
 
     kwargs = dict()
 
-    if output == 'stdout' or 'both':
+    if output in ['stdout', 'both']:
         kwargs['stdout'] = sp.PIPE
 
-    if output == 'stderr' or 'both':
+    if output in ['stderr', 'both']:
         kwargs['stderr'] = sp.PIPE
 
     pr = sp.Popen(command, shell=True, **kwargs)
     pr.wait()
 
-    if output == 'stdout' or 'both':
+    if output in ['stderr', 'both']:
         stdout = pr.stdout.read().decode().split('\n')
 
-    if output == 'stderr' or 'both':
+    if output in ['stderr', 'both']:
         stderr = pr.stderr.read().decode().split('\n')
 
     if output == 'both':
@@ -87,7 +87,11 @@ def runsh(command, output='stdout'):
     
     if output == 'stdout':
         return stdout
-    return stderr
+
+    if output == 'stderr':
+        return stderr
+
+    return
 
 
 def this_proc_mem_gb():
@@ -114,3 +118,7 @@ def is_between(v, mn, mx):
 def is_mac():
     import platform
     return platform.system() == 'Darwin'
+
+
+def run_other_script(path):
+    runsh(f'python {path}', output='none')
