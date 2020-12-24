@@ -45,7 +45,10 @@ class VariablePropertiesLog:
     def speed_std(self):
         return self.get('speed_std')
 
-    
+    @property
+    def position(self):
+        return self.get('position')
+
     @property
     def loadcell(self):
         return self.get('loadcell')
@@ -180,7 +183,7 @@ class VariablePropertiesLog:
             # TODO: generate error details once
             details  = f'Requested property "{prop}" cannot be found, '
             details += 'were the correct categories set?\n'
-            details += f'Got category: {self.cat}.'
+            details += f'Got category: "{self.cat}". '
             details += 'Categories:\n'
             for cat in list(Categories):
                 details += f'  {cat}'

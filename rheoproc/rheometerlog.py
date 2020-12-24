@@ -263,6 +263,12 @@ class RheometerLog(GenericLog):
             strain.append(dti*gdi + strain[-1])
         # strain is in C/Gs - unitless!
 
+        position = list()
+        position.append(np.average(dt) * speed[0]) # speed in rot/s
+        for dti, spi in zip(dt, speed[1:]):
+            position.append(dti*spi + position[-1])
+        # position in rotations
+
         load_torque = apply_calibration(loadcell, speed, self.override_calibration, self.date)
         stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*self.fill_depth))
 
@@ -281,6 +287,7 @@ class RheometerLog(GenericLog):
             },
             'intermediates': {
                 'speed': (speed, 'both'),
+                'position': (position, 'none'),
                 'load_torque': (load_torque, 'both')
             },
             'sensors': {
