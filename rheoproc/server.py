@@ -10,6 +10,12 @@ from rheoproc.port import PORT
 from rheoproc.query import query_db
 from rheoproc.error import timestamp, warning
 
+def fmt_time(t : int):
+    if t > 60:
+        return f'{t//60}m {t%60}s'
+    return f'{t}s'
+
+
 
 class Server:
 
@@ -28,10 +34,16 @@ class Server:
             timestamp(f'Listening on {PORT}')
             self.running = True
             while self.running:
-                self.conn, self.addr = s.accept()
-                self.handle_connection()
-                self.conn.close()
-                self.conn = None
+                try:
+                    self.conn, self.addr = s.accept()
+                    self.handle_connection()
+                    self.conn.close()
+                    self.conn = None
+                except KeyboardInterrupt:
+                    break
+                except Exception:
+                    pass
+
 
 
     def handle_connection(self):
@@ -39,12 +51,12 @@ class Server:
         data = self.conn.recv(4096)
         args, kwargs = pickle.loads(data)
 
-        timestamp(f'Querying database ({args}, {kwargs}) for {self.addr[0]}')
+        self.status('Querying database.')
 
         kwargs['returns'] = 'cache_path'
         try:
             cache_path = query_db(*args, **kwargs)
-            timestamp(f'Preparing result "{cache_path}"')
+            self.status('Preparing result.')
             with open(cache_path, 'rb') as f:
                 data = f.read()
 
@@ -53,8 +65,8 @@ class Server:
             before = time.time()
             data = compress(data, 1)
             after = time.time()
-            dt = after - before
-            self.status(f'Compressed to {len(data)*100//orig_size}% in {dt:.3f} s')
+            dt = int(after - before)
+            self.status(f'Compressed to {len(data)*100//orig_size}% in {fmt_time(dt)}')
 
             self.status('Sending result')
             self.send_message(m_type='preamble', size=len(data))
