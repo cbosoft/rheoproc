@@ -7,9 +7,9 @@ from rheoproc.port import PORT
 from rheoproc.progress import ProgressBar
 from rheoproc.error import timestamp
 
-def read_message(s):
+def read_message(sock):
     data = b''
-    while b := s.recv(1):
+    while b := sock.recv(1):
         data += b
         s = b.decode()
         if s == '}':
