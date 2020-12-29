@@ -22,14 +22,14 @@ class ProgressBar:
         if i is None:
             i = self.pos + 1
 
-        frac = f'▌{i+1}/{self.length}▐'
+        info = f'▌{i+1}/{self.length}▐'
         if self.info_func:
             info = self.info_func(self.length, i)
-            frac = f'▌{info}▐' + frac
-        columns = self.columns - len(frac)
+            info = f'▌{info}▐'
+        columns = self.columns - len(info)
         col_per_i = columns / self.length
         prog = int(col_per_i * (i+1))
-        prog = frac.rjust(prog-1, '█') + '█'
+        prog = info.rjust(prog-1, '█') + '█'
         end = '' if i < self.length-1 else '\n'
         print(f'█{prog}\r', end=end)
 
