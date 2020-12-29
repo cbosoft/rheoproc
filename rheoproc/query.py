@@ -1,7 +1,9 @@
 import os
-import sqlite3
 import sys
+import time
+from queue import Empty
 import multiprocessing as mp
+import threading
 
 from rheoproc.combined import CombinedLogs
 from rheoproc.log import GuessLog, GuessLogType
@@ -11,6 +13,7 @@ from rheoproc.cache import load_from_cache, save_to_cache
 from rheoproc.sql import execute_sql
 from rheoproc.util import runsh, get_hostname, is_mac
 from rheoproc.error import timestamp, warning
+from rheoproc.interprocess import set_q, set_worker
 
 
 ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
@@ -105,7 +108,9 @@ def get_group(GROUP, database='../data/.database.db', Log=GuessLog, order_by=Non
 
 
 def async_get(args_and_kwargs):
-    args, kwargs = args_and_kwargs
+    q, args, kwargs = args_and_kwargs
+    set_q(q)
+    set_worker()
     try:
         rv = GuessLog(*args, **kwargs)
     except GenericRheoprocException as e:
@@ -119,21 +124,22 @@ def async_get(args_and_kwargs):
 
 
 def get_n_processes():
-    system_processors = 0
-    if is_mac():
-        system_processors = int(runsh('sysctl -n hw.ncpu')[0])
-    else:
-        system_processors = int(runsh('nproc')[0])
+    return mp.cpu_count()
 
-    n = system_processors
-    try:
-        if '--proc' in sys.argv:
-            n = int(sys.argv[sys.argv.index('--proc')+1])
-    except IndexError as e:
-        pass
 
-    return n
+def printer(q: mp.Queue, pb: ProgressBar):
+    while True:
+        try:
+            pl = q.get(timeout=10)
+        except Empty:
+            time.sleep(0.1)
+            continue
+        if isinstance(pl, int):
+            break
+        args, kwargs = pl
+        pb.print(*args, **kwargs)
 
+# This whole section is a bit of a mess! TODO: tidy up
 
 def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, ignore_exceptions=False, **kwargs):
 
@@ -178,11 +184,17 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     order = [r['ID'] for r in results]
 
     processes = get_n_processes()
+    processes = min([processes, max_processes])
 
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
-    list_of_args_kwargs = [( (dict(res), data_dir), kwargs) for res in results]
+    mp.set_start_method('fork')
+    m = mp.Manager()
+    q = m.Queue()
+    printer_thread = threading.Thread(target=printer, args=(q,pb), daemon=True)
+    printer_thread.start()
+    list_of_args_kwargs = [(q, (dict(res), data_dir), kwargs) for res in results]
     if processes == 1:
         warning('Only using one core: this could take a while.')
         for a_kw in list_of_args_kwargs:
@@ -196,6 +208,8 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
                 pb.update()
                 if r:
                     processed_results[r.ID] = r
+    q.put(0)
+    printer_thread.join()
 
     timestamp('Sorting')
     for ID in order:
@@ -205,7 +219,7 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
             if ignore_exceptions:
                 pass
             else:
-                print(processed_results)
+                warning(processed_results)
                 raise e
 
     if plain_collection:
