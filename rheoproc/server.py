@@ -31,12 +31,14 @@ class Server:
         data = conn.recv(1024)
         args, kwargs = pickle.loads(data)
         timestamp(f'Querying database ({args}, {kwargs}) for {addr[0]}')
-        kwargs['returns'] = 'cache_path'
-        cache_path = query_db(*args, **kwargs)
-        timestamp(f'Sending result "{cache_path}"')
-        with open(cache_path, 'rb') as f:
-            conn.sendfile(f)
-        time.sleep(10)
+        #kwargs['returns'] = 'cache_path'
+        #cache_path = query_db(*args, **kwargs)
+        #timestamp(f'Sending result "{cache_path}"')
+        #with open(cache_path, 'rb') as f:
+        #    conn.sendfile(f)
+        data = query_db(*args, **kwargs)
+        data_encoded = pickle.dumps(data)
+        conn.sendall(data_encoded)
         conn.close()
 
 
