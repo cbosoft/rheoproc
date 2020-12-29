@@ -29,16 +29,18 @@ class Server:
 
     def handle_connection(self, conn, addr):
         data = conn.recv(1024)
+        # Get query information
+        data = conn.recv(4096)
         args, kwargs = pickle.loads(data)
+
         timestamp(f'Querying database ({args}, {kwargs}) for {addr[0]}')
-        #kwargs['returns'] = 'cache_path'
-        #cache_path = query_db(*args, **kwargs)
-        #timestamp(f'Sending result "{cache_path}"')
-        #with open(cache_path, 'rb') as f:
-        #    conn.sendfile(f)
-        data = query_db(*args, **kwargs)
-        data_encoded = pickle.dumps(data)
-        conn.sendall(data_encoded)
+
+        kwargs['returns'] = 'cache_path'
+        cache_path = query_db(*args, **kwargs)
+        timestamp(f'Sending result "{cache_path}"')
+        with open(cache_path, 'rb') as f:
+            conn.sendfile(f)
+
         conn.close()
 
 
