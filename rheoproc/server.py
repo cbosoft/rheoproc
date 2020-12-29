@@ -35,10 +35,16 @@ class Server:
         timestamp(f'Querying database ({args}, {kwargs}) for {addr[0]}')
 
         kwargs['returns'] = 'cache_path'
-        cache_path = query_db(*args, **kwargs)
-        timestamp(f'Sending result "{cache_path}"')
-        with open(cache_path, 'rb') as f:
-            conn.sendfile(f)
+        try:
+            cache_path = query_db(*args, **kwargs)
+            timestamp(f'Sending result "{cache_path}"')
+            with open(cache_path, 'rb') as f:
+                conn.sendfile(f)
+
+        except Exception as e:
+            # if something goes wrong, send exception back to client
+            se_enc = pickle.dumps(str(e))
+            conn.sendall(se_enc)
 
         conn.close()
 

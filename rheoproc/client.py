@@ -21,4 +21,6 @@ def get_from_server(server_addr, *args, **kwargs):
     print(f'got {len(data)/1024/1024:.5f} MB back')
 
     data = pickle.loads(data)
+    if isinstance(data, str):
+        raise Exception(data)
     return data
