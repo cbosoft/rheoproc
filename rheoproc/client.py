@@ -1,6 +1,6 @@
 import socket
 import pickle
-import bz2
+from zlib import compress, decompress
 
 from rheoproc.port import PORT
 from rheoproc.progress import ProgressBar
@@ -16,7 +16,7 @@ def read_message(s):
             break
         else:
             msg_data.extend(msg_data_part)
-    msg_data = bz2.decompress(msg_data)
+    msg_data = decompress(msg_data)
     msg = pickle.loads(msg_data)
     return msg
 
@@ -64,7 +64,7 @@ def get_from_server(server_addr, *args, **kwargs):
 
     try:
         timestamp('Decompressing data')
-        data = bz2.decompress(data)
+        data = decompress(data)
     except Exception as e:
         timestamp(f'Error while decompressing: {e}')
         pass
