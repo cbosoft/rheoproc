@@ -4,6 +4,7 @@ from lmfit import Parameters, minimize
 from rheoproc.exception import GenericRheoprocException
 from rheoproc.util import norm, unnorm, sqd
 from rheoproc.cache import load_from_cache
+from rheoproc.error import warning
 
 
 def stretch(x, xu, yu):
@@ -42,7 +43,7 @@ def match_phase(x, y, xu, yu):
 def subtract_standard_wobble(pos, lc, motor):
     data = load_from_cache(f'standard_wobble_{motor}')
     if not data:
-        print(f'could not load wobble for motor = {motor}')
+        warning(f'could not load wobble for motor = {motor}')
         return lc
     standard_pos, standard_lc = data
     standard_pos, standard_lc = stretch(pos, standard_pos, standard_lc)
