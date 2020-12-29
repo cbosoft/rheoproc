@@ -1,6 +1,7 @@
 import os
 import socket
 import pickle
+import json
 from zlib import compress, decompress
 
 
@@ -45,7 +46,7 @@ class Server:
             timestamp('Compressing...')
             self.send_message(conn, m_type='status', status='Compressing...')
             orig_size = len(data)
-            data = compress(data)
+            data = compress(data, 1)
             timestamp(f'Compressed {len(data)*100//orig_size}%')
 
             timestamp('Sending preamble to client')
@@ -67,10 +68,7 @@ class Server:
             'type':m_type,
             **kwargs
         }
-        data = pickle.dumps(data)
-        data = compress(data)
-        while len(data) < 4096:
-            data += b'\0'
+        data = json.dumps(data)
         conn.sendall(data)
 
 

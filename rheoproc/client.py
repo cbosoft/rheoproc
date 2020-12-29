@@ -1,5 +1,6 @@
 import socket
 import pickle
+import json
 from zlib import compress, decompress
 
 from rheoproc.port import PORT
@@ -7,18 +8,14 @@ from rheoproc.progress import ProgressBar
 from rheoproc.error import timestamp
 
 def read_message(s):
-    msg_data = bytearray()
-    while msg_data_part := s.recv(1024):
-        if msg_data_part[-1] == '\0':
-            while msg_data_part[-1] == '\0':
-                msg_data_part = msg_data_part[:-1]
-            msg_data.extend(msg_data_part)
+    data = bytearray()
+    while b := s.recv(1):
+        data.extend(b)
+        b = b[0]
+        s = b.encode()
+        if s == '}':
             break
-        else:
-            msg_data.extend(msg_data_part)
-    msg_data = decompress(msg_data)
-    msg = pickle.loads(msg_data)
-    return msg
+    return json.loads(data)
 
 def get_from_server(server_addr, *args, **kwargs):
     data = (args, kwargs)
