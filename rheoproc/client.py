@@ -16,10 +16,16 @@ def get_from_server(server_addr, *args, **kwargs):
         s.sendall(data_encoded)
 
         BUFFLEN = 4096
-        size_enc = s.recv(BUFFLEN)
-        size = pickle.loads(size_enc)
-        if isinstance(size, str):
-            raise Exception(size)
+        size = -1
+        while msg_data := s.recv(BUFFLEN):
+            msg = pickle.loads(bz2.decompress(msg_data))
+            if msg['type'] == 'exception':
+                raise Exception(msg['exception'])
+            elif msg['type'] == 'status':
+                timestamp('remote:', msg['status'])
+            elif msg['type'] == 'preamble':
+                size = msg['size']
+                break
 
         timestamp(f'Downloading {size/1024/1024:.3f} MB')
 
@@ -42,7 +48,12 @@ def get_from_server(server_addr, *args, **kwargs):
                     pb.update(npos)
         pb.update(pb.length)
 
-    data = bz2.decompress(data)
+    try:
+        timestamp('Decompressing data')
+        data = bz2.decompress(data)
+    except Exception as e:
+        timestamp(f'Error while decompressing: {e}')
+        pass
     data = pickle.loads(data)
     if isinstance(data, str):
         raise Exception(data)

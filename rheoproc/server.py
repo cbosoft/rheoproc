@@ -1,6 +1,7 @@
 import os
 import socket
 import pickle
+import bz2
 
 
 from rheoproc.port import PORT
@@ -37,22 +38,40 @@ class Server:
         kwargs['returns'] = 'cache_path'
         try:
             cache_path = query_db(*args, **kwargs)
-            timestamp(f'Sending result "{cache_path}"')
-            nbytes = os.path.getsize(cache_path)
-            nbytes_encoded = pickle.dumps(nbytes)
-            while len(nbytes_encoded) < 4096:
-                nbytes_encoded += b'\0'
-            conn.send(nbytes_encoded)
-
+            timestamp(f'Preparing result "{cache_path}"')
             with open(cache_path, 'rb') as f:
-                conn.sendfile(f)
+                data = f.read()
+
+            timestamp('Compressing...')
+            self.send_message(conn, m_type='status', status='Compressing...')
+            orig_size = len(data)
+            data = bz2.compress(data)
+            timestamp(f'Compressed {len(data)*100//orig_size}%')
+
+            timestamp('Sending preamble to client')
+            self.send_message(conn, m_type='preamble', size=len(data))
+
+            timestamp('Sending result to client')
+            conn.sendall(data)
 
         except Exception as e:
             # if something goes wrong, send exception back to client
-            se_enc = pickle.dumps(str(e))
-            conn.sendall(se_enc)
+            warning('An error occurred: {e}')
+            self.send_message(conn, m_type='exception', exception=str(e))
 
         conn.close()
+
+
+    def send_message(self, conn, *, m_type, buffer_size=4096, **kwargs):
+        data = {
+            'type':m_type,
+            **kwargs
+        }
+        data = pickle.dumps(data)
+        data = bz2.compress(data)
+        while len(data) < buffer_size:
+            data += b'\0'
+        conn.sendall(data)
 
 
     def stop(self):
