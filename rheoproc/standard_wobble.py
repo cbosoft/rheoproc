@@ -36,7 +36,7 @@ def residual_phase(params, x, y, xu, yu):
 def match_phase(x, y, xu, yu):
     params = Parameters()
     params.add('phase', np.random.uniform(), min=0.0, max=1.0)
-    res = minimize(residual_phase, params, args=(x, y, xu, yu))
+    res = minimize(residual_phase, params, args=(x, y, xu, yu), method='ampgo')
     return float(res.params['phase'])
 
 
