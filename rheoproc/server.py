@@ -3,6 +3,7 @@ import socket
 import pickle
 import json
 from zlib import compress, decompress
+import time
 
 
 from rheoproc.port import PORT
@@ -49,13 +50,14 @@ class Server:
 
             self.status('Compressing...')
             orig_size = len(data)
+            before = time.time()
             data = compress(data, 1)
-            self.status(f'Compressed {len(data)*100//orig_size}%')
-
-            self.status('Sending preamble')
-            self.send_message(m_type='preamble', size=len(data))
+            after = time.time()
+            dt = after - before
+            self.status(f'Compressed to {len(data)*100//orig_size}% in {dt:.3f} s')
 
             self.status('Sending result')
+            self.send_message(m_type='preamble', size=len(data))
             self.conn.sendall(data)
 
         except Exception as e:
