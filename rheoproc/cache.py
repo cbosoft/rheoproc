@@ -47,6 +47,10 @@ def write_index(index):
         json.dump(index, indexf)
 
 
+def get_cache_path(key):
+    return read_index()[key]['path']
+
+
 def save_to_cache(key, obj, depends_on=None, expires=None, expires_in_seconds=None, expires_in_days=None):
     name, hsh = get_next_cache_name(key)
 

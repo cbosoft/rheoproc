@@ -9,11 +9,12 @@ from rheoproc.combined import CombinedLogs
 from rheoproc.log import GuessLog, GuessLogType
 from rheoproc.exception import GenericRheoprocException, TooManyResultsError, QueryError
 from rheoproc.progress import ProgressBar
-from rheoproc.cache import load_from_cache, save_to_cache
+from rheoproc.cache import load_from_cache, save_to_cache, get_cache_path
 from rheoproc.sql import execute_sql
 from rheoproc.util import runsh, get_hostname, is_mac
 from rheoproc.error import timestamp, warning
 from rheoproc.interprocess import set_q, set_worker
+from rheoproc.client import get_from_server
 
 
 ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
@@ -141,28 +142,9 @@ def printer(q: mp.Queue, pb: ProgressBar):
 
 # This whole section is a bit of a mess! TODO: tidy up
 
-def query_db(query, database='../data/.database.db', plain_collection=True, max_results=500, process_results=True, max_processes=20, ignore_exceptions=False, **kwargs):
-
-    kwargs['ignore_exceptions'] = ignore_exceptions
-
+def get_from_local(query, *, database='../data/.database.db', process_results=True, max_results=500, max_processes=20,
+                   ignore_exceptions=False, plain_collection=True, **kwargs):
     database = os.path.expanduser(database)
-
-    caching = '--no-cache' not in sys.argv
-
-    if not query.startswith("SELECT * FROM"):
-        raise QueryError(f'SQL query to database must be in the form "SELECT * FROM <TABLE> [WHERE ...];"\n Troublesome query: {query}')
-
-    global table
-    table = query.replace(';', '').split(' ')[3]
-
-    if not table in ACCEPTED_TABLES:
-        raise QueryError(f'SQL queries can only be used to access data-containing tables in the database: \n Troublesome table: {table}')
-
-    if caching:
-        obj = load_from_cache(f'QUERY: {query}, KWARGS: {kwargs}')
-        if obj is not None:
-            return obj
-
     results = execute_sql(query, database)
 
     if not results:
@@ -189,7 +171,8 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
-    mp.set_start_method('fork')
+
+    mp.set_start_method('fork', True)
     m = mp.Manager()
     q = m.Queue()
     printer_thread = threading.Thread(target=printer, args=(q,pb), daemon=True)
@@ -231,12 +214,41 @@ def query_db(query, database='../data/.database.db', plain_collection=True, max_
                 processed_results.append(log)
         else:
             raise GenericRheoprocException('multiple log types not destined for plain collection')
-
-    if caching:
-        timestamp('Caching')
-        depends_on = [log.path for log in processed_results]
-        depends_on.append(database)
-        save_to_cache(f'QUERY: {query}, KWARGS: {kwargs}', processed_results, depends_on)
-
     return processed_results
+
+
+def query_db(query, *args, database='../data/.database.db', server=None, returns='data', **kwargs):
+
+    args = (query, *args)
+    kwargs['database'] = database
+    kwargs['returns'] = returns
+
+    if not query.startswith("SELECT * FROM"):
+        raise QueryError(f'SQL query to database must be in the form "SELECT * FROM <TABLE> [WHERE ...];"\n Troublesome query: {query}')
+
+    global table
+    table = query.replace(';', '').split(' ')[3]
+
+    if not table in ACCEPTED_TABLES:
+        raise QueryError(f'SQL queries can only be used to access data-containing tables in the database: \n Troublesome table: {table}')
+
+    cache_key = f'QUERY: {query}, KWARGS: {kwargs}'
+    obj = load_from_cache(cache_key)
+    if obj is not None:
+        if returns == 'cache_path':
+            return get_cache_path(cache_key)
+        else:
+            return obj
+
+    processed_results = get_from_local(*args, **kwargs) if not server else get_from_server(server, *args, **kwargs)
+
+    timestamp('Caching')
+    depends_on = [log.path for log in processed_results]
+    depends_on.append(database)
+    save_to_cache(cache_key, processed_results, depends_on)
+
+    if returns == 'data':
+        return processed_results
+    elif returns == 'cache_path':
+        return get_cache_path(cache_key)
 
