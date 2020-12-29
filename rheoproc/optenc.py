@@ -22,6 +22,7 @@ class OpticalEncoderLog:
         de = np.diff(self.events)
         mde = np.mean(de)
         mde = np.abs(np.divide(np.subtract(de, mde), mde))
+        optenc_devent_thresh = np.mean(mde) + np.std(mde)*2.0
 
         # strip changes that are too large or small
         # i.e. more than $optenc_devent_thresh
@@ -40,6 +41,7 @@ class OpticalEncoderLog:
             raise ZeroSpeedError(f"Corrupt log (zero event found). {self.parent_log}")
 
         self.speed = speed_from_optenc_events(self.events)
+
         if any([s == 0.0 for s in self.speed]):
             raise ZeroSpeedError(f"Corrupt speed calc (zero speed found). {self.parent_log}")
 
