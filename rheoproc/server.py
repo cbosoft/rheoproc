@@ -68,7 +68,7 @@ class Server:
             'type':m_type,
             **kwargs
         }
-        data = json.dumps(data)
+        data = json.dumps(data).encode()
         conn.sendall(data)
 
 

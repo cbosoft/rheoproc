@@ -8,14 +8,14 @@ from rheoproc.progress import ProgressBar
 from rheoproc.error import timestamp
 
 def read_message(s):
-    data = bytearray()
+    data = b''
     while b := s.recv(1):
-        data.extend(b)
+        data += b
         b = b[0]
-        s = b.encode()
+        s = b.decode()
         if s == '}':
             break
-    return json.loads(data)
+    return json.loads(data.decode())
 
 def get_from_server(server_addr, *args, **kwargs):
     data = (args, kwargs)
