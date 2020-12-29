@@ -2,6 +2,7 @@ import socket
 import pickle
 import json
 from zlib import compress, decompress
+import time
 
 from rheoproc.port import PORT
 from rheoproc.progress import ProgressBar
@@ -15,6 +16,24 @@ def read_message(sock):
         if s == '}':
             break
     return json.loads(data.decode())
+
+class DownloadSpeedo:
+
+    def __init__(self):
+        self.start_time = time.time()
+
+    def info(self, tot, current):
+        dt = time.time() - self.start_time
+        speed = current / dt
+        unit = 'B'
+        if speed > 1024:
+            speed /= 1024
+            unit = 'kB'
+        if speed > 1024:
+            speed /= 1024
+            unit = 'MB'
+        return f'{speed:.1f}{unit}/s'
+
 
 def get_from_server(server_addr, *args, **kwargs):
     data = (args, kwargs)
@@ -46,7 +65,8 @@ def get_from_server(server_addr, *args, **kwargs):
                 div = 1024*1024
             else:
                 div = 1024
-        pb = ProgressBar(size//div)
+        ds = DownloadSpeedo()
+        pb = ProgressBar(size//div + 1, info_func=ds.info)
         i = 0
         while part := s.recv(BUFFLEN):
             data.extend(part)
