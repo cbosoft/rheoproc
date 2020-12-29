@@ -1,6 +1,6 @@
+import os
 import socket
 import pickle
-import time
 
 
 from rheoproc.port import PORT
@@ -38,6 +38,12 @@ class Server:
         try:
             cache_path = query_db(*args, **kwargs)
             timestamp(f'Sending result "{cache_path}"')
+            nbytes = os.path.getsize(cache_path)
+            nbytes_encoded = pickle.dumps(nbytes)
+            while len(nbytes_encoded) < 4096:
+                nbytes_encoded += b'\0'
+            conn.send(nbytes_encoded)
+
             with open(cache_path, 'rb') as f:
                 conn.sendfile(f)
 
