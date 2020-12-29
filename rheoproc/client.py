@@ -19,20 +19,22 @@ def read_message(sock):
 
 class DownloadSpeedo:
 
-    def __init__(self):
+    def __init__(self, mult):
         self.start_time = time.time()
+        self.mult = mult
+
 
     def info(self, tot, current):
         dt = time.time() - self.start_time
-        speed = current / dt
-        unit = 'B'
+        speed = current * self.mult / dt
+        unit = 'b'
         if speed > 1024:
             speed /= 1024
-            unit = 'kB'
+            unit = 'kb'
         if speed > 1024:
             speed /= 1024
-            unit = 'MB'
-        return f'{speed:.1f}{unit}/s'
+            unit = 'Mb'
+        return f'{speed:.1f} {unit}/s'
 
 
 def get_from_server(server_addr, *args, **kwargs):
@@ -56,7 +58,18 @@ def get_from_server(server_addr, *args, **kwargs):
                 size = msg['size']
                 break
 
-        timestamp(f'Downloading {size/1024/1024:.3f} MB')
+        unit = 'b'
+        if size > 1024:
+            size /= 1024
+            unit = 'kb'
+        if size > 1024:
+            size /= 1024
+            unit = 'Mb'
+        if size > 1024:
+            size /= 1024
+            unit = 'Gb'
+
+        timestamp(f'Downloading {size:.1f} {unit}')
 
         data = bytearray()
         div = 1
@@ -65,7 +78,7 @@ def get_from_server(server_addr, *args, **kwargs):
                 div = 1024*1024
             else:
                 div = 1024
-        ds = DownloadSpeedo()
+        ds = DownloadSpeedo(div)
         pb = ProgressBar(size//div + 1, info_func=ds.info)
         i = 0
         while part := s.recv(BUFFLEN):
