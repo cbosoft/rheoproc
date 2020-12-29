@@ -6,6 +6,20 @@ from rheoproc.port import PORT
 from rheoproc.progress import ProgressBar
 from rheoproc.error import timestamp
 
+def read_message(s):
+    msg_data = bytearray()
+    while msg_data_part := s.recv(1024):
+        if msg_data_part[-1] == '\0':
+            while msg_data_part[-1] == '\0':
+                msg_data_part = msg_data_part[:-1]
+            msg_data.extend(msg_data_part)
+            break
+        else:
+            msg_data.extend(msg_data_part)
+    msg_data = bz2.decompress(msg_data)
+    msg = pickle.loads(msg_data)
+    return msg
+
 def get_from_server(server_addr, *args, **kwargs):
     data = (args, kwargs)
     data_encoded = pickle.dumps(data)
@@ -17,8 +31,8 @@ def get_from_server(server_addr, *args, **kwargs):
 
         BUFFLEN = 4096
         size = -1
-        while msg_data := s.recv(BUFFLEN):
-            msg = pickle.loads(bz2.decompress(msg_data))
+        while True:
+            msg = read_message(s)
             if msg['type'] == 'exception':
                 raise Exception(msg['exception'])
             elif msg['type'] == 'status':

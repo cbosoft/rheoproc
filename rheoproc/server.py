@@ -62,15 +62,14 @@ class Server:
         conn.close()
 
 
-    def send_message(self, conn, *, m_type, buffer_size=4096, **kwargs):
+    def send_message(self, conn, *, m_type, **kwargs):
         data = {
             'type':m_type,
             **kwargs
         }
         data = pickle.dumps(data)
         data = bz2.compress(data)
-        while len(data) < buffer_size:
-            data += b'\0'
+        data += b'\0'
         conn.sendall(data)
 
 
