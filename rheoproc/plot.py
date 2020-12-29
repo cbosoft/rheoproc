@@ -17,7 +17,8 @@ from rheoproc.error import timestamp
 
 def get_plot_name(subplot_name=None, ext='.pdf'):
     n = inspect.stack()[1].filename
-    loc = os.path.relpath(os.path.dirname(n), '.')
+    d = os.path.dirname(n)
+    loc = '.' if not d else os.path.relpath(d, '.')
     n = os.path.basename(n).replace('.py', '')
 
     if subplot_name:
