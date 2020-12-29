@@ -74,7 +74,7 @@ class Server:
 
         except Exception as e:
             # if something goes wrong, send exception back to client
-            warning('An error occurred: {e}')
+            warning(f'An error occurred: {e}')
             self.send_message(m_type='exception', exception=str(e))
 
 
