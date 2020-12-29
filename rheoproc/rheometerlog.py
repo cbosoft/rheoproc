@@ -45,7 +45,7 @@ class RheometerLog(GenericLog):
         self.quiet = quiet
         self.very_quiet = very_quiet
         self.parse_row(row, data_dir, **kwargs)
-        data = self.process_data(self, **kwargs)
+        data = self.process_data(**kwargs)
         self.set_data(data, **kwargs)
 
 
