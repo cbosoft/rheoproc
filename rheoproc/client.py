@@ -6,7 +6,7 @@ from rheoproc.port import PORT
 def get_from_server(server_addr, *args, **kwargs):
     data = (args, kwargs)
     data_encoded = pickle.dumps(data)
-    print(f'sending data ({len(data_encoded)} bytes) to server')
+    print(f'sending data ({len(data_encoded)} bytes) to server at {server_addr}:{PORT}')
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect( (server_addr, PORT) )
