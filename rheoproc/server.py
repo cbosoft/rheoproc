@@ -45,7 +45,7 @@ class Server:
             timestamp('Compressing...')
             self.send_message(conn, m_type='status', status='Compressing...')
             orig_size = len(data)
-            data = bz2.compress(data)
+            data = bz2.compress(data, 3)
             timestamp(f'Compressed {len(data)*100//orig_size}%')
 
             timestamp('Sending preamble to client')
