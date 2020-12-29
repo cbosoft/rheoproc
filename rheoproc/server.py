@@ -28,7 +28,6 @@ class Server:
 
 
     def handle_connection(self, conn, addr):
-        data = conn.recv(1024)
         # Get query information
         data = conn.recv(4096)
         args, kwargs = pickle.loads(data)
