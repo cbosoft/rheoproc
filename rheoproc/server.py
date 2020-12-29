@@ -1,5 +1,7 @@
 import socket
 import pickle
+import time
+
 
 from rheoproc.port import PORT
 from rheoproc.query import query_db
@@ -34,6 +36,7 @@ class Server:
         timestamp(f'Sending result "{cache_path}"')
         with open(cache_path, 'rb') as f:
             conn.sendfile(f)
+        time.sleep(10)
         conn.close()
 
 
