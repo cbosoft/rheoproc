@@ -1,5 +1,6 @@
 import socket
 import pickle
+import bz2
 
 from rheoproc.port import PORT
 from rheoproc.progress import ProgressBar
@@ -41,6 +42,7 @@ def get_from_server(server_addr, *args, **kwargs):
                     pb.update(npos)
         pb.update(pb.length)
 
+    data = bz2.decompress(data)
     data = pickle.loads(data)
     if isinstance(data, str):
         raise Exception(data)

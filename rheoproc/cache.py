@@ -4,6 +4,7 @@ import hashlib
 import json
 import sys
 import time
+import bz2
 
 from rheoproc.error import timestamp, warning
 
@@ -75,7 +76,7 @@ def save_to_cache(key, obj, depends_on=None, expires=None, expires_in_seconds=No
     write_index(index)
     
     timestamp(f'saving object {hsh[:3]}...{hsh[-3:]} to cache.')
-    with open(name, 'wb') as pf:
+    with bz2.BZ2File(name, 'w') as pf:
         pickle.dump(obj, pf, protocol=4)
 
 
@@ -121,7 +122,7 @@ def load_from_cache(key):
                 return None
 
     try:
-        with open(entry['path'], 'rb') as pf:
+        with bz2.BZ2File(entry['path'], 'r') as pf:
             o = pickle.load(pf)
     except Exception as e:
         warning(f'Error loading cached file; removing from index. Error: {e}')
