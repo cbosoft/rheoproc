@@ -11,7 +11,6 @@ def read_message(s):
     data = b''
     while b := s.recv(1):
         data += b
-        b = b[0]
         s = b.decode()
         if s == '}':
             break
