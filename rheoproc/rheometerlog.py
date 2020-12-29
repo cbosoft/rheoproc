@@ -16,7 +16,7 @@ from rheoproc.calibration import apply_calibration
 from rheoproc.viscosity import get_material_viscosity
 from rheoproc.optenc import OpticalEncoderLog
 from rheoproc.clean import clean_data
-from rheoproc.exception import FileTypeError, PathNotAFileError, TimeRationalError
+from rheoproc.exception import GenericRheoprocException, FileTypeError, PathNotAFileError, TimeRationalError
 from rheoproc.genericlog import GenericLog
 from rheoproc.varproplog import Categories
 from rheoproc.videodata import VideoData
@@ -164,7 +164,7 @@ class RheometerLog(GenericLog):
                     else:
                         self.warning(f"Log has a photograph, but not reading it (arg 'read_photo' is False).")
                 else:
-                    selfwarning(f'Not processing unknown log contents: {member.name}')
+                    self.warning(f'Not processing unknown log contents: {member.name}')
 
         self.timestamp(f'Read tar: found {len(encoders)} encoders and a {len(lines)}pt long main log')
         dat = parse_csv(lines)
@@ -212,8 +212,7 @@ class RheometerLog(GenericLog):
         try:
             loadcell = dat[11]
         except IndexError:
-            print("Log is TSTS log?") # TODO check and work around this
-            sys.exit(1)
+            raise GenericRheoprocException("Log is TSTS log?") # TODO check and work around this
 
         lco_v, lco_t = rat_times(loadcell, time)
         self.stress_samplerate = 1./np.average(np.diff(lco_t))
@@ -235,7 +234,7 @@ class RheometerLog(GenericLog):
             ambient_temperature = [np.nan for __ in temperature]
 
         if not encoders:
-            raise Exception("No optical encoder logs")
+            raise GenericRheoprocException("No optical encoder logs")
 
         speed = np.zeros(np.shape(raw_time))
 
@@ -245,10 +244,11 @@ class RheometerLog(GenericLog):
                 speed = np.add(speed, encoder.speed_in_alt_time(raw_time))
             speed = np.divide(speed, float(len(encoders)))
 
+        if np.any(np.isnan(speed)):
+            raise Exception('NaN speed')
+
         if (lt := len(raw_time)) != (ls := len(speed)):
             raise TimeRationalError(f'Time array and speed array must match lengths ({lt} != {ls}); something has gone wrong.')
-
-        if not quiet: timestamp('Calculating rheology')
 
         RIN = self.geometry['RIN']
         ROUT = self.geometry['ROUT']
