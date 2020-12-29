@@ -40,8 +40,10 @@ class RheometerLog(GenericLog):
     acceptable_extensions = ['.tar', '.gz', '.bz2']
 
 
-    def __init__(self, row, data_dir, **kwargs):
+    def __init__(self, row, data_dir, *, quiet=True, very_quiet=False, **kwargs):
         super().__init__()
+        self.quiet = quiet
+        self.very_quiet = very_quiet
         self.parse_row(row, data_dir, **kwargs)
         data = self.process_data(self, **kwargs)
         self.set_data(data, **kwargs)
@@ -51,7 +53,7 @@ class RheometerLog(GenericLog):
         return f'RheometerLog({{PATH={self.path}, ID={self.ID}, MATERIAL={self.material}, TAGS={";".join(self.tags)}}})'
 
 
-    def parse_row(self, row, data_dir, quiet=True, **kwargs):
+    def parse_row(self, row, data_dir, **kwargs):
 
         path = os.path.join(data_dir, row['PATH'])
 
@@ -82,18 +84,24 @@ class RheometerLog(GenericLog):
             self.roi = None
 
         if self.meta_data['LOADCELL CALIBRATION OVERRIDE']:
-            if not quiet: timestamp("Using override calibration:")
-            print(' ', self.meta_data['LOADCELL CALIBRATION OVERRIDE'])
+            self.timestamp("Using override calibration:")
+            self.timestamp(' ', self.meta_data['LOADCELL CALIBRATION OVERRIDE'])
             self.override_calibration = json.loads(self.meta_data['LOADCELL CALIBRATION OVERRIDE'])
         else:
             self.override_calibration = None
 
+    def timestamp(self, *args, **kwargs):
+        if not self.quiet:
+            timestamp(f'[{self.ID}]', *args, **kwargs)
 
-    def process_data(self, quiet=True, read_video=False, read_photo=False, clean=True, calc_speed=True, **kwargs):
-        if not quiet: timestamp(f"init new RheometerLog (DBID={self.ID})")
+    def warning(self, *args, **kwargs):
+        if not self.very_quiet:
+            warning(f'[{self.ID}]', *args, **kwargs)
 
-        if not quiet: timestamp('Reading tarfile')
-        
+    def process_data(self, read_video=False, read_photo=False, clean=True, calc_speed=True,
+                     standard_wobble_method='subtract', **kwargs):
+        self.timestamp('Processing RheometerLog')
+
         encoders = list()
         photos = list()
         run_params = dict()
@@ -119,25 +127,21 @@ class RheometerLog(GenericLog):
             elif 'depth_mm' in run_params:
                 self.fill_depth = run_params['depth_mm']
             else:
-                # warning('legacy log: no fill depth information available (using default of 73)')
+                self.warning('legacy log: no fill depth information available (using default of 73)')
                 self.fill_depth = 73.0
 
             if 'needle_depth_mm' in run_params:
                 self.needle_depth =  run_params['needle_depth_mm']
             else:
-                pass #warning('legacy log: no needle depth information available')
+                self.warning('legacy log: no needle depth information available')
 
             for member in tarlog.getmembers():
                 if OPTENC_LOG_RE.match(member.name):
-                    if not quiet: timestamp('Found optical encoder')
                     with tarlog.extractfile(member) as logfp:
-                        encoders.append(OpticalEncoderLog(logfp, self))
-                    if not quiet: timestamp('--> done')
+                        encoders.append(OpticalEncoderLog(logfp, self, **kwargs))
                 elif MAIN_LOG_RE.match(member.name):
-                    if not quiet: timestamp('Found main log')
                     with tarlog.extractfile(member) as logfp:
                         lines = [l.decode('utf-8') for l in logfp.readlines()]
-                    if not quiet: timestamp('--> done')
                 elif RUNPARAMS_RE.match(member.name):
                     pass
                 elif VIDEO_RE.match(member.name):
@@ -150,7 +154,7 @@ class RheometerLog(GenericLog):
                             db_data=self.meta_data,
                             run_params=run_params)
                     else:
-                        pass  # warning(f"Log {self.ID} has video, but not reading it (arg 'read_video' is False).")
+                        self.warning(f"Log has video, but not reading it (arg 'read_video' is False).")
                 elif PHOTO_RE.match(member.name):
                     if read_photo:
                         tarlog.extractall(path=f'/tmp', members=[member])
@@ -158,12 +162,11 @@ class RheometerLog(GenericLog):
                         os.system(f'rm /tmp/{member.name}')
                         photos.append(image)
                     else:
-                        pass  # warning(f"Log {self.ID} has a photograph, but not reading it (arg 'read_photo' is False).")
+                        self.warning(f"Log has a photograph, but not reading it (arg 'read_photo' is False).")
                 else:
-                    warning(f'Not processing unknown log contents: {member.name}')
+                    selfwarning(f'Not processing unknown log contents: {member.name}')
 
-
-        if not quiet: timestamp('Sorting main csv data')
+        self.timestamp(f'Read tar: found {len(encoders)} encoders and a {len(lines)}pt long main log')
         dat = parse_csv(lines)
 
         ######### clean data based on swver
@@ -178,7 +181,6 @@ class RheometerLog(GenericLog):
         ###########
             
         dat = np.array(dat)
-        if not quiet: timestamp('--> done')
 
         raw_time = dat[0]
         time = np.subtract(raw_time, raw_time[0])
@@ -193,7 +195,7 @@ class RheometerLog(GenericLog):
 
         #ca = np.array(dat[9])
         if 20200908 <= self.software_version <= 20200910:
-            warning(f'Logged using software ver {self.software_version} (between 20200908 and 20200910): fixing error in temp calc')
+            self.warning(f'Logged using software ver {self.software_version} (between 20200908 and 20200910): fixing error in temp calc')
             broken_temp = dat[10]
             fixed_temp = np.zeros(len(broken_temp))
             for i, vi in enumerate(broken_temp):
@@ -220,10 +222,11 @@ class RheometerLog(GenericLog):
         try:
             loadcell = recreate(time, loadcell, loadcell, kind='linear')
         except ValueError as ve:
-            print('loadcell can\'t be recreated: may be faulty!')
+            self.warning('loadcell can\'t be recreated: may be faulty!')
             self.recreated_loadcell = False
         except Exception as e:
             #loadcell = recreate(time, loadcell, loadcell, kind='linear')
+            print(self.ID)
             raise e
 
         if len(dat) > 12:
@@ -274,7 +277,7 @@ class RheometerLog(GenericLog):
 
         viscosity = ns.divide(stress, strainrate)
         expected_viscosity = get_material_viscosity(self.material, np.array(temperature, dtype=np.float64))
-        if not quiet: timestamp('--> done')
+        self.timestamp('Processing complete')
 
         data = {
             'rheology': {
