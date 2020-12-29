@@ -68,8 +68,9 @@ class Server:
             **kwargs
         }
         data = pickle.dumps(data)
-        data += b'\0'
         data = compress(data)
+        while len(data) < 4096:
+            data += b'\0'
         conn.sendall(data)
 
 
