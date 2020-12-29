@@ -16,6 +16,8 @@ class Server:
     def __init__(self):
         self.running = False
         timestamp('Procserver started')
+        self.conn = None
+        self.addr = None
 
 
     def run(self):
@@ -25,16 +27,18 @@ class Server:
             timestamp(f'Listening on {PORT}')
             self.running = True
             while self.running:
-                conn, addr = s.accept()
-                self.handle_connection(conn, addr)
+                self.conn, self.addr = s.accept()
+                self.handle_connection()
+                self.conn.close()
+                self.conn = None
 
 
-    def handle_connection(self, conn, addr):
+    def handle_connection(self):
         # Get query information
-        data = conn.recv(4096)
+        data = self.conn.recv(4096)
         args, kwargs = pickle.loads(data)
 
-        timestamp(f'Querying database ({args}, {kwargs}) for {addr[0]}')
+        timestamp(f'Querying database ({args}, {kwargs}) for {self.addr[0]}')
 
         kwargs['returns'] = 'cache_path'
         try:
@@ -43,33 +47,35 @@ class Server:
             with open(cache_path, 'rb') as f:
                 data = f.read()
 
-            timestamp('Compressing...')
-            self.send_message(conn, m_type='status', status='Compressing...')
+            self.status('Compressing...')
             orig_size = len(data)
             data = compress(data, 1)
-            timestamp(f'Compressed {len(data)*100//orig_size}%')
+            self.status(f'Compressed {len(data)*100//orig_size}%')
 
-            timestamp('Sending preamble to client')
-            self.send_message(conn, m_type='preamble', size=len(data))
+            self.status('Sending preamble')
+            self.send_message(m_type='preamble', size=len(data))
 
-            timestamp('Sending result to client')
-            conn.sendall(data)
+            self.status('Sending result')
+            self.conn.sendall(data)
 
         except Exception as e:
             # if something goes wrong, send exception back to client
             warning('An error occurred: {e}')
-            self.send_message(conn, m_type='exception', exception=str(e))
-
-        conn.close()
+            self.send_message(m_type='exception', exception=str(e))
 
 
-    def send_message(self, conn, *, m_type, **kwargs):
+    def send_message(self, *, m_type, **kwargs):
         data = {
             'type':m_type,
             **kwargs
         }
         data = json.dumps(data).encode()
-        conn.sendall(data)
+        self.conn.sendall(data)
+
+
+    def status(self, status_msg):
+        timestamp(status_msg)
+        self.send_message(m_type='status', status=status_msg)
 
 
     def stop(self):
