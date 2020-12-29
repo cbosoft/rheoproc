@@ -124,3 +124,24 @@ def is_mac():
 
 def run_other_script(path):
     runsh(f'python {path}', output='none')
+
+
+def norm(v):
+    mn = np.min(v)
+    mx = np.max(v)
+    av = np.mean(v)
+    n = np.subtract(v, av)
+    d = mx - mn
+    return np.divide(n, d)
+
+
+def unnorm(normalised, average, span):
+    v = np.multiply(normalised, span)
+    v = np.add(v, average)
+    return v
+
+
+def sqd(y1, y2):
+    err = np.subtract(y2, y1)
+    err = np.power(err, 2.0)
+    return np.sum(err)
