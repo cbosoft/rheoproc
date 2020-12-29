@@ -76,7 +76,9 @@ def runsh(command, output='stdout'):
     pr = sp.Popen(command, shell=True, **kwargs)
     pr.wait()
 
-    if output in ['stderr', 'both']:
+    stdout, stderr = None, None
+
+    if output in ['stdout', 'both']:
         stdout = pr.stdout.read().decode().split('\n')
 
     if output in ['stderr', 'both']:
