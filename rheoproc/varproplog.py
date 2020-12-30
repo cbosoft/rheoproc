@@ -1,3 +1,7 @@
+# rheoproc.varproplog
+# Contains the VariablePropertiesLog class - from which the main data logs derive. It manages the read-only properties
+# that each rheology data logs should contain.
+
 from enum import Enum, auto
 
 import numpy as np

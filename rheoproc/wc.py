@@ -1,3 +1,6 @@
+# rheoproc.wc
+# contains functions for calculating a 'phase diagram' for cornstarch systems by applying the Wyart-Cates (WC) framework.
+
 import numpy as np
 from matplotlib import patches
 

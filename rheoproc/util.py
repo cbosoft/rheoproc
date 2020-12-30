@@ -1,3 +1,6 @@
+# rheoproc.util
+# contains utility functions which aid in the running of the rest of the module.
+
 import subprocess as sp
 import os
 

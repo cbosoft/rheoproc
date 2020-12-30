@@ -1,4 +1,6 @@
-import sys
+# rheoproc.error
+# this file contains functions related to output/printing (despite the misnomer).
+
 from datetime import datetime
 
 from rheoproc.colours import *

@@ -1,3 +1,7 @@
+# rheoproc.cache
+#
+# This file contains functions related to disk-caching processed results.
+
 import os
 import pickle
 import hashlib

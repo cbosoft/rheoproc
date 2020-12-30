@@ -1,3 +1,6 @@
+# rheoproc.viscosity
+# contains functions for calculating the viscosity of glycerol-water mixtures.
+
 import re
 import numpy as np
 

@@ -1,3 +1,7 @@
+# rheoproc.pnd
+# file containing a method for converting the dual (unsigned) channel novel piezoelectric-needle device (PND) to
+# single (signed) channel.
+
 import numpy as np
 from rheoproc.util import convert_bit_to_volts
 

@@ -1,3 +1,6 @@
+# rheoproc.video
+# Contains a class for managing the processing of a video. Used for image analysis.
+
 import os
 from datetime import datetime, timedelta
 import time

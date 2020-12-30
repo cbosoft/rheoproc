@@ -1,3 +1,6 @@
+# rheoproc.historiclog
+# Historic class for processing (very) old style plain csv log.
+
 import os
 import time
 import json

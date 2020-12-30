@@ -1,3 +1,8 @@
+# rheoproc.corr
+# Separate from analysis, this correlation function levarages the auto-correlation function written in c - in the
+# accelproc module.
+
+
 from rheoproc.accelproc import tcorr
 
 def get_time_corr(t, v, *, bin_width=None, width_factor=0.0005, max_lag=20.0):

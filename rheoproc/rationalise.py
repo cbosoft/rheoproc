@@ -1,3 +1,7 @@
+# rheoproc.rationalise
+# loadcell measurements are 'stepped' insensibly when logged. Functions here are used to rationalise the data and provide a
+# non-stepped version of the loadcell.
+
 import numpy as np
 from scipy.interpolate import interp1d
 

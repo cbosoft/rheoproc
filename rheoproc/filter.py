@@ -1,3 +1,6 @@
+# rheoproc.filter
+# Provides methods for filtering a data series - by simply moving average or by more complex filtering.
+
 import numpy as np
 from scipy import signal
 

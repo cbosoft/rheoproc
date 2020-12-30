@@ -1,3 +1,6 @@
+# rheoproc.temperature
+# contains a function for predicting the temperature rise in a fluid due to shear/viscous heating.
+
 import numpy as np
 
 from rheoproc.viscosity import get_material_heatcapacity, get_density_material

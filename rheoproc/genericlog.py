@@ -1,3 +1,6 @@
+# rheoproc.genericlog
+# A generic log, from which others derive. Defines start and end time methods used in video processing.
+
 from rheoproc.varproplog import VariablePropertiesLog
 
 class GenericLog(VariablePropertiesLog):

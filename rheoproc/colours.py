@@ -1,3 +1,6 @@
+# rheoproc.colours
+# Contains shell escape codes for making coloured output.
+
 FG_BLACK   = u"\u001b[30m"
 FG_RED     = u"\u001b[31m"
 FG_GREEN   = u"\u001b[32m"

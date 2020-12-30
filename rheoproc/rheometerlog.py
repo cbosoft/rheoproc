@@ -1,3 +1,6 @@
+# rheoproc.rheometerlog
+# main log class handling the bulk of the processing.
+
 import os
 from time import time as now
 import json

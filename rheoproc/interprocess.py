@@ -1,4 +1,6 @@
-from multiprocessing import Queue
+# rheoproc.interprocess
+# Methods here for enabling cross process communication. Relatively poor design - should be replaced by a more complete
+# 'logger' class which encompasses this rather than having bare methods and a global variable.
 
 __is_worker = False
 def set_worker():

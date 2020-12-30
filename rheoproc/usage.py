@@ -1,3 +1,6 @@
+# rheoproc.usage
+# Shows some help on usage when a rheoproc script is run with '--help' as an argument
+
 import sys
 
 from rheoproc.colours import *

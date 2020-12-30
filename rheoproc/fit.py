@@ -1,6 +1,13 @@
+# rheoproc.fit
+# Provides simple utility methods for fitting functions and plotting/labelling polynomial fits.
+
 import numpy as np
 
 def apply_fit(fitx, coeffs):
+    '''
+    Given a list of coefficients and an x series, get the y series given by the polynomial
+    with the coefficients given in the args.
+    '''
     fity = 0.0
     for p, c in zip(range(len(coeffs)-1, -1, -1), coeffs):
         fity = np.add(fity, np.multiply(np.power(fitx, p), c))
@@ -8,6 +15,11 @@ def apply_fit(fitx, coeffs):
 
 
 def fit(x, y, d, return_label=False, xname='x', yname='y', return_func=False, fitx=None):
+    '''
+    Light wrapper around numpy's polyfit. Returns not the coeffs, but the y-series. May also
+    output the label which might be displayed on a plot, and a lambda function which applies
+    the fit when called.
+    '''
     coeffs = np.polyfit(x, y, d)
 
     if fitx is None:

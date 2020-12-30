@@ -1,3 +1,6 @@
+# rheoproc.clean
+# Contains function responsible for cleaning up raw data, removing outliers, repairing/removing holes etc
+
 import numpy as np
 
 from rheoproc.accelproc import filter_loadcell

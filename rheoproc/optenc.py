@@ -1,3 +1,6 @@
+# rheoproc.optenc
+# Optical encoder management class - calculates rotation rate using the accelproc c-functions
+
 import numpy as np
 from matplotlib import pyplot as plt
 

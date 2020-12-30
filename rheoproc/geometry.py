@@ -1,3 +1,7 @@
+# rheoproc.geometry
+# Defines a hard-coded database of geometry sizes. Since this does not change, but could in future, this was decided
+# as a decent mix of modularity and simplicity. (A call to the db just to get the geometry was the other option and
+# could still be implemented if necessary).
 
 def get_geometry(hw_version=-1):
     GEOMETRY = [

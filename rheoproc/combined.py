@@ -1,3 +1,7 @@
+# rheoproc.combined
+# Contains class and functions related to creating a combined log from multiple sources - can be useful when desiring a
+# mean view of a dataset.
+
 from collections import defaultdict
 
 import numpy as np

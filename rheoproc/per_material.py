@@ -1,3 +1,8 @@
+# rheoproc.per_material
+# a work-in-progress to define a colour for each tested material at every individual speed. This would be great for the
+# reader of my thesis, glancing at a plot you know what material the green line represents and under what conditions it was
+# sheared. Problem is, I am colour blind! Many colours look very similar to me.
+
 from matplotlib.cm import get_cmap
 import numpy as np
 

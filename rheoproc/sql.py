@@ -1,3 +1,6 @@
+# rheoproc.sql
+# light wrapper around the sqlite3 builtin module - tidies the API into a single function call.
+
 import os
 import sqlite3
 

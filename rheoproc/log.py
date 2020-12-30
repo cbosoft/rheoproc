@@ -1,3 +1,6 @@
+# rheoproc.log
+# Provides functions for creating the correct type of log for the database row given.
+
 from rheoproc.rheometerlog import RheometerLog
 from rheoproc.syringepumplog import SyringepumpLog
 from rheoproc.dhrlog import DHRLog

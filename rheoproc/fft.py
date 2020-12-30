@@ -1,3 +1,7 @@
+# rheoproc.fft
+# This file contains functions to regularise and simplify the task of performing a (fast) Fourier transform - a
+# very common operation.
+
 import numpy as np
 #import nfft # bonus points for accounting for off-grid
 

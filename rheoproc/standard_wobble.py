@@ -1,3 +1,6 @@
+# rheoproc.standard_wobble
+# Functions defined here manage the removal of the 'standard wobble' an inherent noise originating in the rheometer.
+
 import numpy as np
 from lmfit import Parameters, minimize
 

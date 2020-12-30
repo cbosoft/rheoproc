@@ -1,3 +1,6 @@
+# rheoproc.exception
+# This file contains some rather exceptional exceptions.
+
 class GenericRheoprocException(Exception):
     '''Base class from which rheproc exceptions derive'''
 

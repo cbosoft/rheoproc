@@ -1,3 +1,6 @@
+# rheoproc.calibration
+# functions for applying a previously calculated calibration (i.e. function transforming loadcell to stress/force)
+
 from datetime import datetime as dt
 import json
 

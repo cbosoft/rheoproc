@@ -1,3 +1,6 @@
+# rheoproc.corrgen
+# Functions in this file are used to generate streams of correlated random noise - used in analysis of some correlations.
+
 import numpy as np
 
 

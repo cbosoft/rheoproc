@@ -1,3 +1,6 @@
+# rheoproc.syringepumplog
+# a class for managing the loading of data logged using another rheometer I built (https://github.com/syringepump).
+
 import os
 import time
 import json

@@ -1,3 +1,6 @@
+# rheproc.progress
+# flexible progress indicator class
+
 import os
 from threading import Lock
 

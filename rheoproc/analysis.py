@@ -1,3 +1,6 @@
+# rheoproc.analysis
+# Contains functions for performing analysis on data (histogramming, cross- and auto-correlation).
+
 import warnings
 
 import numpy as np
@@ -6,6 +9,13 @@ from rheoproc.exception import NaNError
 
 
 def get_lag(t):
+    '''
+    Get the lag of a time series - this is the x axis for a correlation plot.
+    'Lag' is centred about zero, with -half_period on the left and +half_period on
+    the right.
+
+    This function returns the lag series which corresponds to a given time series.
+    '''
     lags = np.cumsum(np.diff(t))
 
     l = len(t)

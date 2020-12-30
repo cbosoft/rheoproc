@@ -1,7 +1,10 @@
+# rheoproc.client
+# This file contains functions relevant to connecting to a remote processing server (see rheoproc.server)
+
 import socket
 import pickle
 import json
-from zlib import compress, decompress
+from zlib import decompress
 import time
 
 from rheoproc.port import PORT

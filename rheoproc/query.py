@@ -1,3 +1,8 @@
+# rheoproc.query
+# Contains functions for efficiently querying the databse for logs and managing the processing of the data.
+# Spawns processes using the 'multiprocessing' library or asks a remote process server to deal with it if
+# server address given.
+
 import os
 import sys
 import time

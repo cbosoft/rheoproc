@@ -1,3 +1,6 @@
+# rheoproc.dhrlog
+# This file contains a class related to the processing of data from the DHR - a rheometer separate to the one I designed.
+
 import tarfile
 import os
 

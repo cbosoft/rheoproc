@@ -1,3 +1,6 @@
+# rheoproc.server
+# remote processing server - class is created and run when rheoproc module is called as a program: 'python -m rheoproc'
+
 import os
 import socket
 import pickle

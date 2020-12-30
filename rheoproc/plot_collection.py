@@ -1,3 +1,6 @@
+# rheoproc.plot_collection
+# Plot a series of data in a neat and tidy collection of subplots suitable for inclusion in an article or thesis.
+
 import string
 
 import numpy as np

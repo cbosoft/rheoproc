@@ -1,3 +1,6 @@
+# rheoproc.videodata
+# used for processing the data of a single video, unlike video log which has video contained within a tarfile log.
+
 import os
 from datetime import datetime, timedelta
 import time

@@ -1,3 +1,7 @@
+# rheoproc.plot
+# Provides a thin wrapper around pyplot to preempt some erroes (looking at you MacOS11 bug) as well as a class to manage
+# the creation of a multi-page 'booklet' plotter.
+
 import os
 import inspect
 import sys

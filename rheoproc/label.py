@@ -1,3 +1,6 @@
+# rheoproc.label
+# Functions for uniformly formatting units in plot labels.
+
 def fmt_lbl(label, symbol, unit):
     lbl = label
     if symbol or unit:
