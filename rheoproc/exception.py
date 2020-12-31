@@ -43,3 +43,6 @@ class NaNError(GenericRheoprocException):
 
 class ZeroSpeedError(GenericRheoprocException):
     '''Zero speed was found; is the calc corrupt?'''
+
+class WobbleError(GenericRheoprocException):
+    '''Error loading wobble data from database'''
