@@ -11,10 +11,14 @@ def execute_sql(query, database):
     #     runsh('cat database.txt | sqlite3 .database.db')
         
     conn = sqlite3.connect(database)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    cur.execute(query)
-    results = cur.fetchall()
-    conn.close()
+    try:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute(query)
+        results = cur.fetchall()
+        conn.close()
+    finally:
+        if conn:
+            conn.close()
     return results
-    
+
