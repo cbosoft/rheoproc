@@ -22,3 +22,17 @@ def execute_sql(query, database):
             conn.close()
     return results
 
+
+def insert_with_blob(table, data, columns, database):
+    conn = sqlite3.connect(database)
+    try:
+        cur = conn.cursor()
+        cols = ', '.join(columns)
+        vals = ', '.join(['?' for __ in data])
+        query = f'INSERT INTO {table} ({cols}) VALUES ({vals});'
+        data = tuple(data)
+        cur.execute(query, data)
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
