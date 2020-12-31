@@ -25,43 +25,21 @@ from rheoproc.client import get_from_server
 ACCEPTED_TABLES = ['LOGS', 'VIDEOS']
 
 
-def get_log(ID, database='../data/.database.db', Log=GuessLog, **kwargs):
-
-    database = os.path.expanduser(database)
-
-    assert isinstance(ID, (int, list))
-
-    if isinstance(ID, list):
-        return [get_log(ID_item, database, Log=Log) for ID_item in ID]
-
+def get_log(ID, database='../data/.database.db', **kwargs):
     query = f'SELECT * FROM LOGS WHERE ID={ID};'
+    return query_db(query, database=database, **kwargs)[0]
 
-    caching = '--no-cache' not in sys.argv
 
-    if caching:
-        obj = load_from_cache(query)
-        if obj is not None:
-            return obj
-
-    results = execute_sql(query, database)
-
-    assert results
-
-    data_dir = '/'.join(database.split('/')[:-1])
-
-    rv = Log(results[0], data_dir, **kwargs)
-
-    if caching:
-        save_to_cache(query, rv, [rv.path])
-
-    return rv
-
+def get_logs(IDs, database='../data/.database.db', **kwargs):
+    conds = ' OR '.join([f'ID={ID}' for ID in IDs])
+    query = f'SELECT * FROM LOGS WHERE {conds};'
+    return query_db(query, database=database, **kwargs)
 
 
 
 def format_condition(column, operand, operation='=', combination='any'):
     if not isinstance(operand, (str, list)):
-        raise TypeError(f'Argument operand must be str, or list^n of str. Got {type(operand)}.')
+        raise TypeError(f'Argument operand must be str, or list of str. Got {type(operand)}.')
 
     if combination not in ['any', 'all']:
         raise TypeError(f'Keyword combination must be either \'any\' or \'all\' (corresponding to OR and AND respectively). Got \'{combination}\'.')
