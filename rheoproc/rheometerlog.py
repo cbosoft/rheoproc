@@ -28,7 +28,7 @@ from rheoproc.software_versions import SW_VER_COMPLETE_LOG
 from rheoproc.hardware_versions import HW_VER_PND_MONO, HW_VER_PND_SPLIT
 from rheoproc.pnd import pnd_recombine
 from rheoproc.rationalise import rat_times, recreate
-from rheoproc.standard_wobble import subtract_standard_wobble
+from rheoproc.standard_wobble import remove_standard_wobble
 
 
 OPTENC_LOG_RE = re.compile(r'^(logs/)?rpir_.*_.*_opt(\d*)-(.*)\.csv$')
@@ -276,8 +276,7 @@ class RheometerLog(GenericLog):
             position.append(dti*spi + position[-1])
         # position in rotations
 
-        if standard_wobble_method == 'subtract':
-            loadcell = subtract_standard_wobble(position, loadcell, self.motor)
+        loadcell = remove_standard_wobble(position, loadcell, self.motor, standard_wobble_method)
 
         load_torque = apply_calibration(loadcell, speed, self.override_calibration, self.date)
         stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*self.fill_depth))
