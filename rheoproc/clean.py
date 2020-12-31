@@ -7,7 +7,7 @@ from rheoproc.accelproc import filter_loadcell
 from rheoproc.filter import strip
 
 
-def clean_data(data, *, chop_first_seconds=0, strip_errors=False, acctdlib_lcfilt_same_thresh=100, **kwargs):
+def clean_data(data, *, chop_first_seconds=0, strip_errors=True, acctdlib_lcfilt_same_thresh=100, **kwargs):
     '''
     remove errored loadcell data from data table (column-major). error prone
     data is replaced with Nones, or relevant rows are stripped (depending on arg
