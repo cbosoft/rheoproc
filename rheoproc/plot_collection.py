@@ -128,7 +128,8 @@ class FFTLogPlotter(LogPlotter):
     def __init__(self, **kwargs):
         x_func = lambda log: get_fftx(log.time)
         xlabel = freq_label()
-        super().__init__(x_func=x_func, xlabel=xlabel, **kwargs)
+        ylabel = ffty_label()
+        super().__init__(x_func=x_func, xlabel=xlabel, ylabel=ylabel, **kwargs)
     
     def plot(self, log):
         x, y = super().plot(log)
@@ -144,8 +145,7 @@ class StressFFTLogPlotter(FFTLogPlotter):
 
     def __init__(self):
         y_func = lambda log: get_ffty(log.time, log.stress)
-        ylabel = None
-        super().__init__(y_func=y_func, ylabel=ylabel)
+        super().__init__(y_func=y_func)
     
     def plot(self, log):
         x, y = super().plot(log)
@@ -157,16 +157,14 @@ class StrainrateFFTLogPlotter(FFTLogPlotter):
 
     def __init__(self):
         y_func = lambda log: get_ffty(log.time, log.strainrate)
-        ylabel = None
-        super().__init__(y_func=y_func, ylabel=ylabel)
+        super().__init__(y_func=y_func)
 
 
 class ViscosityFFTLogPlotter(FFTLogPlotter):
 
     def __init__(self):
         y_func = lambda log: get_ffty(log.time, log.viscosity)
-        ylabel = None
-        super().__init__(y_func=y_func, ylabel=ylabel)
+        super().__init__(y_func=y_func)
 
 
 ###############################################################################
