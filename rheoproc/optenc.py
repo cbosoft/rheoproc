@@ -25,7 +25,7 @@ class OpticalEncoderLog:
         de = np.diff(self.events)
         mde = np.mean(de)
         mde = np.abs(np.divide(np.subtract(de, mde), mde))
-        optenc_devent_thresh = np.mean(mde) + np.std(mde)*2.0
+        optenc_devent_thresh = np.mean(mde) + np.std(mde)*1.0
 
         # strip changes that are too large or small
         # i.e. more than $optenc_devent_thresh
@@ -57,7 +57,6 @@ class OpticalEncoderLog:
         if len(self.speed) == 0:
             return np.array([np.nan]*len(alt_time))
 
-        arr_alt = np.array(alt_time, dtype=np.float64)
         spd_in_alt = np.interp(
             np.array(alt_time, dtype=np.float64),
             np.array(self.events, dtype=np.float64),
