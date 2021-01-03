@@ -42,6 +42,22 @@ def freq_label(units='Hz', symbol='\\omega'):
     return fmt_lbl('Frequency', symbol, units)
 
 
+def angular_position_label(units='rot', symbol='\\theta'):
+    return fmt_lbl('Angular Position', symbol, units)
+
+
+def angular_velocity_label(units=r'rot\,s^[-1}', symbol='\\omega_r'):
+    return fmt_lbl('Angular Velocity', symbol, units)
+
+
+def loadcell_label(units=None, symbol=r'\Lambda'):
+    return fmt_lbl('Loadcell Value', symbol, units)
+
+
+def loadcell_norm_label(units=None, symbol=r'\hat\Lambda'):
+    return fmt_lbl('Normalised Loadcell Value', symbol, units)
+
+
 def ffty_label(units=None, symbol=None):
     # TODO
     return None
