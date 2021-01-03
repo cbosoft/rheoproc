@@ -82,7 +82,7 @@ def save_wobble_waveform(waveform, motor='ANY', date=None, database='../data/.da
 
 
 def load_wobble_waveform(motor:str, date:int=-1, database:str='../data/.database.db'):
-    query = f'SELECT * FROM WOBBLE WHERE DATE>{date} AND MOTOR LIKE "{motor}" AND TYPE="waveform" ORDER BY DATE DESC LIMIT 1;'
+    query = f'SELECT * FROM WOBBLE WHERE DATE>{date} AND (MOTOR LIKE "{motor}" OR MOTOR="ANY") AND TYPE="waveform" ORDER BY DATE DESC LIMIT 1;'
     res = execute_sql(query, database)
     if not res:
         raise WobbleError(f'No data for date {date} and motor {motor} in database.')
@@ -92,7 +92,7 @@ def load_wobble_waveform(motor:str, date:int=-1, database:str='../data/.database
 
 
 def load_wobble_frequencies(motor:str, date:int=-1, database:str='../data/.database.db'):
-    query = f'SELECT * FROM WOBBLE WHERE DATE>{date} AND MOTOR LIKE "{motor}" AND TYPE="frequencies" ORDER BY DATE DESC LIMIT 1;'
+    query = f'SELECT * FROM WOBBLE WHERE DATE>{date} AND (MOTOR LIKE "{motor}" OR MOTOR="ANY") AND TYPE="frequencies" ORDER BY DATE DESC LIMIT 1;'
     res = execute_sql(query, database)
     if not res:
         raise WobbleError(f'No data for date {date} and motor {motor} in database.')
