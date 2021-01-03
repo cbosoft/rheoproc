@@ -154,5 +154,7 @@ def subtract_standard_wobble(pos, lc, motor, exceptions=False):
     nlc = norm(lc)
     phase = match_phase(pos, nlc, standard_pos, standard_lc)
     standard_lc = np.interp(pos, np.subtract(standard_pos, phase), standard_lc)
-    nfiltered = np.subtract(nlc, standard_lc)
-    return unnorm(nfiltered, np.mean(lc), np.max(lc) - np.min(lc))
+    subtracted_normalised = np.subtract(nlc, standard_lc)
+    subtracted =  unnorm(subtracted_normalised, np.mean(lc), np.max(lc) - np.min(lc))
+    timestamp(f'standard wobble subtracted.')
+    return subtracted
