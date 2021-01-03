@@ -6,6 +6,7 @@ import pickle
 from sqlite3 import Error as SQLiteError
 
 import numpy as np
+from scipy import signal
 from lmfit import Parameters, minimize
 
 from rheoproc.exception import GenericRheoprocException, WobbleError
@@ -127,7 +128,15 @@ def filter_standard_wobble(pos, lc, motor, exceptions=False):
         else:
             return lc
 
-    raise NotImplementedError('filtering not yet implemented')
+    maxfreq = 1/np.average(np.diff(pos))
+    filtered = lc
+    w = 0.2
+    for freq in frequencies:
+        band = [freq-w, freq+w]
+        sos = signal.butter(3, band, btype='bandstop', output='sos', fs=maxfreq)
+        filtered = signal.sosfiltfilt(sos, filtered)
+    timestamp(f'standard wobble filtered.')
+    return filtered
 
 
 def subtract_standard_wobble(pos, lc, motor, exceptions=False):
