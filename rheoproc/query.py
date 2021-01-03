@@ -87,7 +87,7 @@ def get_group(GROUP, database='../data/.database.db', Log=GuessLog, order_by=Non
     else:
         orderbysql = ""
 
-    return query_db(f'SELECT * FROM LOGS WHERE (TAGS LIKE "%;{GROUP};%" OR TAGS LIKE "{GROUP};%" OR TAGS = "{GROUP}") {orderbysql};', database, plain_collection=True, **kwargs)
+    return query_db(f'SELECT * FROM LOGS WHERE (TAGS LIKE "%;{GROUP};%" OR TAGS LIKE "{GROUP};%" OR TAGS = "{GROUP}") {orderbysql};', database=database, plain_collection=True, **kwargs)
 
 
 
