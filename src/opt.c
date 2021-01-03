@@ -50,7 +50,7 @@ int opt_calc_speed(double *events, unsigned int nevents, double **speed, unsigne
 {
 
   double revs_per_trip = 1.0 / TRIPS_PER_REV;
-  unsigned int lag = TRIPS_PER_REV * 1;
+  unsigned int lag = 1; //TRIPS_PER_REV * 1;
   (*speed) = zeros(nevents);
   (*len) = nevents;
   double dr, dt;
