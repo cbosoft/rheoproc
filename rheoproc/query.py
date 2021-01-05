@@ -98,9 +98,9 @@ def async_get(args_and_kwargs):
     try:
         rv = GuessLog(*args, **kwargs)
     except GenericRheoprocException as e:
-        if kwargs['ignore_exceptions']:
-            print('ignored exception')
-            print(e)
+        if 'ignore_exceptions' in kwargs and kwargs['ignore_exceptions']:
+            warning('ignored exception')
+            warning(e)
             return None
         else:
             raise e
@@ -129,6 +129,7 @@ def get_from_local(query, *, database='../data/.database.db', process_results=Tr
                    ignore_exceptions=False, plain_collection=True, **kwargs):
     database = os.path.expanduser(database)
     results = execute_sql(query, database)
+    kwargs['ignore_exceptions'] = ignore_exceptions
 
     if not results:
         raise QueryError(f"No results returned by query \"{query}\"")
