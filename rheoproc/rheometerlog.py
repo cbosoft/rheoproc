@@ -103,7 +103,7 @@ class RheometerLog(GenericLog):
             warning(f'[{self.ID}]', *args, **kwargs)
 
     def process_data(self, read_video=False, read_photo=False, clean=True, calc_speed=True,
-                     standard_wobble_method='subtract', **kwargs):
+                     standard_wobble_method='any', **kwargs):
         self.timestamp('Processing RheometerLog')
 
         encoders = list()
