@@ -101,16 +101,19 @@ def load_wobble_frequencies(motor:str, date:int=-1, database:str='../data/.datab
     return data
 
 
-def remove_standard_wobble(pos, lc, motor, method):
+def remove_standard_wobble(pos, lc, motor, method, **kwargs):
     if method == 'any':
-        try:
-            return subtract_standard_wobble(pos, lc, motor, exceptions=True)
-        except (SQLiteError, WobbleError):
-            return filter_standard_wobble(pos, lc, motor)
+        for method in ['filter', 'subtract']:
+            try:
+                return remove_standard_wobble(pos, lc, motor, method, exceptions=True)
+            except (SQLiteError, WobbleError):
+                pass
+        warning(f'No filtering method available: ignoring.')
+        return lc
     elif method == 'subtract':
-        return subtract_standard_wobble(pos, lc, motor)
+        return subtract_standard_wobble(pos, lc, motor, **kwargs)
     elif method == 'filter':
-        return filter_standard_wobble(pos, lc, motor)
+        return filter_standard_wobble(pos, lc, motor, **kwargs)
     elif method == 'dont':
         return lc
     else:
@@ -128,13 +131,16 @@ def filter_standard_wobble(pos, lc, motor, exceptions=False):
         else:
             return lc
 
-    maxfreq = 1/np.average(np.diff(pos))
+    maxfreq = 1/np.nanmean(np.diff(pos))
     filtered = lc
     w = 0.2
     for freq in frequencies:
         band = [freq-w, freq+w]
-        sos = signal.butter(3, band, btype='bandstop', output='sos', fs=maxfreq)
-        filtered = signal.sosfiltfilt(sos, filtered)
+        try:
+            sos = signal.butter(3, band, btype='bandstop', output='sos', fs=maxfreq)
+            filtered = signal.sosfiltfilt(sos, filtered)
+        except Exception as e:
+            raise WobbleError('Error when filtering frequencies') from e
     timestamp(f'standard wobble filtered.')
     return filtered
 
