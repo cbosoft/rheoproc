@@ -89,10 +89,11 @@ class MultiPagePlot:
 
 
     def __exit__(self, *args):
-        pdfs_in = ' '.join(self.pages)
-        pdf_out = self.path
-        command = f'pdfunite {pdfs_in} {pdf_out}'
-        runsh(command)
+        if self.pages:
+            pdfs_in = ' '.join(self.pages)
+            pdf_out = self.path
+            command = f'pdfunite {pdfs_in} {pdf_out}'
+            runsh(command)
 
 
     def savefig(self):
