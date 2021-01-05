@@ -39,11 +39,12 @@ class DownloadSpeedo:
         return f'{speed:.1f} {unit}/s'
 
 
-def get_from_server(server_addr, *args, **kwargs):
+def get_from_server(server_addr, *args, timeout=10, **kwargs):
     data = (args, kwargs)
     data_encoded = pickle.dumps(data)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(timeout)
         s.connect( (server_addr, PORT) )
         timestamp(f'Querying rheoproc server at {server_addr}:{PORT}')
         s.sendall(data_encoded)
