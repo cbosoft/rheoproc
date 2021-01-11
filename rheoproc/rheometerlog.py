@@ -277,6 +277,8 @@ class RheometerLog(GenericLog):
         # position in rotations
 
         loadcell = remove_standard_wobble(position, loadcell, self.motor, standard_wobble_method)
+        # LC value seems to be hovering around 2**31, halfway up a 32-bit integer. Somewhere I've made a mistake
+        # converting an unsigned int.
 
         load_torque = apply_calibration(loadcell, speed, self.override_calibration, self.date)
         stress = ns.divide(load_torque, 2.0*np.pi*RIN*RIN*(0.001*self.fill_depth))
