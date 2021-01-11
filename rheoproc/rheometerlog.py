@@ -19,7 +19,7 @@ from rheoproc.calibration import apply_calibration
 from rheoproc.viscosity import get_material_viscosity
 from rheoproc.optenc import OpticalEncoderLog
 from rheoproc.clean import clean_data
-from rheoproc.exception import GenericRheoprocException, FileTypeError, PathNotAFileError, TimeRationalError
+from rheoproc.exception import GenericRheoprocException, FileTypeError, PathNotAFileError, TimeRationalError, NaNError
 from rheoproc.genericlog import GenericLog
 from rheoproc.varproplog import Categories
 from rheoproc.videodata import VideoData
@@ -249,7 +249,7 @@ class RheometerLog(GenericLog):
             speed = np.divide(speed, float(len(encoders)))
 
         if np.any(np.isnan(speed)):
-            raise Exception('NaN speed')
+            raise NaNError('NaN speed')
 
         if (lt := len(raw_time)) != (ls := len(speed)):
             raise TimeRationalError(f'Time array and speed array must match lengths ({lt} != {ls}); something has gone wrong.')
