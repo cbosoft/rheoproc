@@ -81,6 +81,7 @@ class RheometerLog(GenericLog):
         self.tags = self.meta_data['TAGS'].split(';')
         self.setpoint = self.meta_data['SETPOINT']
         self.date = datetime.strptime(self.meta_data['DATE'], '%Y-%m-%d')
+        self.has_PND = self.meta_data['PND'] == 'YES'
 
         if self.meta_data['RECTANGLE OF INTEREST']:
             self.roi = json.loads(self.meta_data['RECTANGLE OF INTEREST'])
