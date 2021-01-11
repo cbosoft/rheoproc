@@ -1,5 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 #include <limits.h>
+#include <stdio.h>
 #include <float.h>
 
 #include "accelproc.h"
@@ -8,23 +9,23 @@
 
 
 
-size_t get_uncounted_limit(double *x, size_t len, size_t *counted, int negative_peaks, double threshold)
+int get_next_peak(double *x, size_t len, size_t *counted, double threshold)
 {
-  double lim = negative_peaks ? DBL_MAX : DBL_MIN;
-  double dircoef = negative_peaks ? -1.0 : 1.0;
-  size_t limat = 0;
+  // get index of largest uncounted peak
+  double peak = DBL_MIN;
+  size_t peak_index = -1;
 
   for (size_t i = 0 ; i < len ; i++) {
     if (counted[i])
       continue;
 
-    if (dircoef*x[i] > dircoef*lim && dircoef*x[i] > dircoef*threshold) {
-      lim = x[i];
-      limat = i;
+    if (x[i] > peak && x[i] > threshold) {
+      peak = x[i];
+      peak_index = i;
     }
   }
-  
-  return limat;
+
+  return peak_index;
 }
 
 
@@ -36,7 +37,7 @@ void peakdet(double* signal,
     double **peaks, 
     size_t **peak_indices, 
     size_t *npeaks, 
-    int negative_peaks) 
+    int mode)
 {
 
   // get minimum in points sequence
@@ -48,28 +49,44 @@ void peakdet(double* signal,
   size_t  *_indcs = calloc(len, sizeof(size_t));
   size_t *counted = calloc(len, sizeof(size_t));
 
+
+  double *signal_directioned = calloc(len, sizeof(double));
+  for (size_t i = 0; i < len; i++) {
+    double si = signal[i];
+    switch (mode) {
+      case PEAKDET_MODE_NEGATIVE:
+        si = si*-1.0;
+        break;
+      case PEAKDET_MODE_BOTH:
+        si = (si > 0) ? si : -si;
+        break;
+    }
+    signal_directioned[i] = si;
+  }
+
   size_t c = 0;
-  double dircoef = negative_peaks ? -1.0 : 1.0;
-  size_t mindex;
+  for (c = 0; c < len; c++) {
+    int peak = get_next_peak(signal_directioned, len, counted, threshold);
+    if (peak < 0)
+      break;
 
-  do {
-    mindex = get_uncounted_limit(signal, len, counted, negative_peaks, threshold);
-
-    for (size_t i = mindex; i > 0; i--) {
+    // go back from peak, marking off parts of the same peak
+    for (size_t i = peak; i > 0; i--) {
       counted[i] = 1;
-      if (dircoef*signal[i] < dircoef*threshold)
-        break;
-    }
-    for (size_t i = mindex; i < len; i++) {
-      counted[i] = 1;
-      if (dircoef*signal[i] < dircoef*threshold)
+      if (signal_directioned[i] < threshold)
         break;
     }
 
-    _peaks[c] = signal[mindex];
-    _indcs[c] = mindex;
-    c ++;
-  } while (mindex > 0);
+    // go forward from peak, marking off parts of the same peak
+    for (size_t i = peak; i < len; i++) {
+      counted[i] = 1;
+      if (signal_directioned[i] < threshold)
+        break;
+    }
+
+    _peaks[c] = signal[peak];
+    _indcs[c] = (size_t)peak;
+  };
 
 
   if (c == 0) {
@@ -93,5 +110,7 @@ void peakdet(double* signal,
     (*npeaks) = c;
 
   }
+
+  free(signal_directioned);
 
 }
