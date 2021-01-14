@@ -5,6 +5,7 @@
 import os
 import inspect
 import sys
+from collections import defaultdict
 
 from rheoproc.util import is_mac
 
@@ -38,6 +39,90 @@ def get_plot_name(subplot_name=None, ext='.pdf'):
 
     return name
 
+
+class Styler:
+
+    def __init__(self):
+        self.styles = dict()
+
+    def _call_or_get(self, item):
+        if item not in self.styles:
+            self.styles[item] = self.get_style(item)
+        return self.styles[item]
+
+    def __call__(self, item):
+        return self._call_or_get(item)
+
+    def __getitem__(self, item):
+        return self._call_or_get(item)
+
+    def get_style(self, item):
+        raise NotImplementedError('Not Implemented')
+
+
+class Colourist(Styler):
+    ''' Class which dishes out colours based on a key.
+    Uses the matplotlib default colours by default,
+    override method "get_colour(i)" to change
+    colouring behaviour.'''
+
+    def get_style(self, item):
+        '''Called once per item, on first creation of the style (i.e. item is not in styles dict yet).'''
+        return self.get_colour(len(self.styles))
+
+    @staticmethod
+    def get_colour(i: int) -> str:
+        return f'C{i}'
+
+class Shaperist:
+    '''as colurist, but for marker shapes.'''
+
+    def get_style(self, item):
+        '''Called once per item, on first creation of the style (i.e. item is not in styles dict yet).'''
+        return self.get_shape(len(self.styles))
+
+    @staticmethod
+    def get_shape(i: int) -> str:
+        strs = 'ovs*PD^1pX'
+        i = i % len(strs)
+        return strs[i]
+
+
+__orig_plot = pyplot.plot
+def __plot_wrapped(*args, colour_by=None, shape_by=None, colourist=None, shaperist=None, auto_raster=True, **kwargs):
+    if args and auto_raster:
+        if len(args[0]) > 10000:
+            kwargs['rasterized'] = True
+    if colour_by is None:
+        if shape_by is None:
+            __orig_plot(*args, **kwargs)
+        else:
+            x, y = args[:2]
+            args = args[2:]
+            xc, yc = defaultdict(list), defaultdict(list)
+
+            for xi, yi, ci in zip(x, y, shape_by):
+                xc[ci].append(xi)
+                yc[ci].append(yi)
+
+            for c in xc.keys():
+                x, y = xc[c], yc[c]
+                _kwargs = {'fmt': shaperist[c], **kwargs}
+                __plot_wrapped(x, y, *args, **_kwargs)
+    else:
+        x, y = args[:2]
+        args = args[2:]
+        xc, yc = defaultdict(list), defaultdict(list)
+
+        for xi, yi, ci in zip(x, y, colour_by):
+            xc[ci].append(xi)
+            yc[ci].append(yi)
+
+        for c in xc.keys():
+            x, y = xc[c], yc[c]
+            _kwargs = {'color': colourist[c], 'label': c, **kwargs}
+            __plot_wrapped(x, y, *args, **_kwargs)
+pyplot.plot = __plot_wrapped
 
 __orig_legend = pyplot.legend
 def __legend_wrapped(*args, position=None, position_offset=0.02, **kwargs):
