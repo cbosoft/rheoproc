@@ -46,7 +46,10 @@ def angular_position_label(units='rot', symbol='\\theta'):
     return fmt_lbl('Angular Position', symbol, units)
 
 
-def angular_velocity_label(units=r'rot\,s^[-1}', symbol='\\omega_r'):
+def angular_velocity_label(units=r'rot\,s^{-1}', symbol='\\omega_r'):
+    return fmt_lbl('Angular Velocity', symbol, units)
+
+def speed_label(units=r'rot\,s^{-1}', symbol='\\omega_r'):
     return fmt_lbl('Angular Velocity', symbol, units)
 
 
