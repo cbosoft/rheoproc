@@ -103,7 +103,10 @@ class VariablePropertiesLog:
     def loadcell_std(self):
         return self.get('loadcell_std')
 
-    
+    @property
+    def loadcell_raw_indices(self):
+        return self.get('loadcell_raw_indices')
+
     @property
     def viscosity(self):
         return self.get('viscosity')
