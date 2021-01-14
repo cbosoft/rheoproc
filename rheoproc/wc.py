@@ -150,16 +150,16 @@ def plot_phase_diagram(plt, *, phi_m, phi_o, mu_f, sigma_star, beta,
         twax.set_xlabel(r'Mass Fraction, $w$')
         plt.sca(ax)
 
-def get_phij(f, phi_m, phi_o):
+def get_phij(f, phi_m, phi_o, **kwargs):
     return np.add(np.multiply(f, phi_m), np.multiply(np.subtract(1, f), phi_o))
 
-def get_eta(phi, phij, etaf):
+def get_eta(phi, phij, etaf, **kwargs):
     rv = np.power(np.subtract(1, np.divide(phi, phij)), -2)
     #if phi > phij:
     #    rv = np.nan
     return np.multiply(rv, etaf)
 
-def get_f(sigma, sigma_star, beta):
+def get_f(sigma, sigma_star, beta, **kwargs):
     rv = np.exp(np.multiply(-1, np.power(np.divide(sigma_star, sigma), beta)))
     return rv
 
@@ -236,3 +236,15 @@ def get_sigma_dst(*, sigma_star, beta, phi_m, phi_o, mu_f,
     phi_off = phi_o - phi_DST[0]
     phi_DST = np.add(phi_DST, phi_off)
     return phi_DST, sigma_DST, gd_DST
+
+
+def predict_strainrate(mf, sigma, cs_data=None, wc_data=None):
+    if cs_data is None:
+        cs_data = CSData()
+    if wc_data is None:
+        wc_data = WCData()
+    phi = get_phi_from_mf(mf, **cs_data)
+    f = get_f(sigma, **wc_data)
+    phij = get_phij(f, **wc_data)
+    eta = get_eta(phi, phij, wc_data.mu_f)
+    return np.divide(sigma, eta)
