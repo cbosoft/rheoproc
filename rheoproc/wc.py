@@ -8,7 +8,7 @@ import sympy as sy
 
 class WCData(dict):
 
-    def __init__(self, *, phi_o, phi_m, mu_f, sigma_star, beta):
+    def __init__(self, *, phi_o=0.646, phi_m=0.447, mu_f=0.055, sigma_star=-.078, beta=1.23):
         self['phi_o'] = phi_o
         self['phi_m'] = phi_m
         self['mu_f'] = mu_f
