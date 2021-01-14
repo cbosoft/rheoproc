@@ -60,6 +60,27 @@ def loadcell_label(units=None, symbol=r'\Lambda'):
 def loadcell_norm_label(units=None, symbol=r'\hat\Lambda'):
     return fmt_lbl('Normalised Loadcell Value', symbol, units)
 
+def prsd_label(prop, symbol):
+    return fmt_lbl(f'PRSD ({prop})', f'\\Sigma_{{{symbol}}}^{{\\%}}', '\\%')
+
+def prsd_stress_label():
+    return prsd_label('stress', '\\sigma')
+
+def prsd_strainrate_label():
+    return prsd_label('strainrate', '\\dot\\gamma')
+
+def prsd_speed_label():
+    return prsd_label('angular velocity', '\\omega_r')
+
+def prsd_viscosity_label():
+    return prsd_label('viscosity', '\\mu')
+
+def pnd_label(units='V', symbol=r'V_{PND}'):
+    return fmt_lbl('PND Voltage', symbol, units)
+
+def pnd_mono_label(units='V', symbol=r'\left|V_{PND}\right|'):
+    return fmt_lbl('PND Voltage (single channel)', symbol, units)
+
 
 def ffty_label(units=None, symbol=None):
     # TODO
