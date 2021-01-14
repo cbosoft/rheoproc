@@ -16,7 +16,7 @@ from rheoproc.accelproc import parse_csv
 from rheoproc.error import timestamp, warning
 from rheoproc.geometry import get_geometry
 from rheoproc.calibration import apply_calibration
-from rheoproc.viscosity import get_material_viscosity
+from rheoproc.viscosity import get_material_viscosity, get_cs_composition_material
 from rheoproc.optenc import OpticalEncoderLog
 from rheoproc.clean import clean_data
 from rheoproc.exception import GenericRheoprocException, FileTypeError, PathNotAFileError, TimeRationalError, NaNError
@@ -29,6 +29,7 @@ from rheoproc.hardware_versions import HW_VER_PND_MONO, HW_VER_PND_SPLIT
 from rheoproc.pnd import pnd_recombine
 from rheoproc.rationalise import rat_times, recreate
 from rheoproc.standard_wobble import remove_standard_wobble
+from rheoproc.util import convert_bit_to_volts
 
 
 OPTENC_LOG_RE = re.compile(r'^(logs/)?rpir_.*_.*_opt(\d*)-(.*)\.csv$')
@@ -82,6 +83,8 @@ class RheometerLog(GenericLog):
         self.setpoint = self.meta_data['SETPOINT']
         self.date = datetime.strptime(self.meta_data['DATE'], '%Y-%m-%d')
         self.has_PND = self.meta_data['PND'] == 'YES'
+
+        self.mf = get_cs_composition_material(self.material)
 
         if self.meta_data['RECTANGLE OF INTEREST']:
             self.roi = json.loads(self.meta_data['RECTANGLE OF INTEREST'])
@@ -189,14 +192,15 @@ class RheometerLog(GenericLog):
 
         raw_time = dat[0]
         time = np.subtract(raw_time, raw_time[0])
-        adc = np.array([np.array(a) for a in dat[1:9]])
+        adc = np.array([convert_bit_to_volts(a, bit_length=12, max_voltage=3.3) for a in dat[1:9]])
 
-        if HW_VER_PND_MONO <= self.hardware_version < HW_VER_PND_SPLIT:
+        pnd = np.array([], dtype=np.float64)
+        if self.hardware_version < HW_VER_PND_SPLIT and self.has_PND:
             pnd = adc[1]
+            self.pnd_channels = 1
         elif HW_VER_PND_SPLIT <= self.hardware_version:
             pnd = pnd_recombine(adc[1], adc[2])
-        else:
-            pnd = np.array([])
+            self.pnd_channels = 2
 
         #ca = np.array(dat[9])
         if 20200908 <= self.software_version <= 20200910:
@@ -219,13 +223,13 @@ class RheometerLog(GenericLog):
         except IndexError:
             raise GenericRheoprocException("Log is TSTS log?") # TODO check and work around this
 
-        lco_v, lco_t = rat_times(loadcell, time)
+        lco_v, lco_t, lco_i = rat_times(loadcell, time, list(range(len(time))))
         self.stress_samplerate = 1./np.average(np.diff(lco_t))
         self.samplerate = 1./np.average(np.diff(time))
         self.recreated_loadcell = True
         try:
             loadcell = recreate(time, loadcell, loadcell, kind='linear')
-        except ValueError as ve:
+        except ValueError:
             self.warning('loadcell can\'t be recreated: may be faulty!')
             self.recreated_loadcell = False
         except Exception as e:
@@ -300,7 +304,8 @@ class RheometerLog(GenericLog):
             'intermediates': {
                 'speed': (speed, 'both'),
                 'position': (position, 'none'),
-                'load_torque': (load_torque, 'both')
+                'load_torque': (load_torque, 'both'),
+                'loadcell_raw_indices': (lco_i, 'none')
             },
             'sensors': {
                 'loadcell': (loadcell, 'both'),
@@ -360,7 +365,7 @@ class RheometerLog(GenericLog):
                             continue
                     try:
                         len(value)
-                        self.data[name] = np.array(value, np.float64)
+                        self.data[name] = np.array(value)
                     except:
                         self.data[name] = value
 
