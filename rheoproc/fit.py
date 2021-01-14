@@ -14,7 +14,29 @@ def apply_fit(fitx, coeffs):
     return fity
 
 
-def fit(x, y, d, return_label=False, xname='x', yname='y', return_func=False, fitx=None):
+def fmt_polynomial(coeffs, xname='x', yname='y'):
+    label = f'${yname} = '
+    first = True
+    for p, c in zip(range(len(coeffs)-1, -1, -1), coeffs):
+        if first:
+            first = False
+        else:
+            if c < 0.0:
+                c = c * -1.0
+                label += ' - '
+            else:
+                label += ' + '
+        if p > 1:
+            label += f'{c:.3f}\\,{xname}^{p}'
+        elif p == 1:
+            label += f'{c:.3f}\\,{xname}'
+        else:
+            label += f'{c:.3f}'
+    label += '$'
+    return label
+
+
+def fit(x, y, d, return_coeffs=False, return_label=False, xname='x', yname='y', return_func=False, fitx=None):
     '''
     Light wrapper around numpy's polyfit. Returns not the coeffs, but the y-series. May also
     output the label which might be displayed on a plot, and a lambda function which applies
@@ -26,28 +48,13 @@ def fit(x, y, d, return_label=False, xname='x', yname='y', return_func=False, fi
         fitx = np.sort(x)
     fity = apply_fit(fitx, coeffs)
 
-    rv = [fitx, fity]
+    if return_coeffs:
+        rv = [coeffs]
+    else:
+        rv = [fitx, fity]
 
     if return_label:
-        label = f'${yname} = '
-        first = True
-        for p, c in zip(range(d, -1, -1), coeffs):
-            if first:
-                first = False
-            else:
-                if c < 0.0:
-                    c = c*-1.0
-                    label = label + ' - '
-                else:
-                    label = label + ' + '
-            if p > 1:
-                label = label + f'{c:.3f}{xname}^{p}'
-            elif p == 1:
-                label = label + f'{c:.3f}{xname}'
-            else:
-                label = label + f'{c:.3f}'
-        label = label + '$'
-        rv.append(label)
+        rv.append(fmt_polynomial(coeffs, xname=xname, yname=yname))
 
     if return_func:
         f = lambda x: apply_fit(x, coeffs)
