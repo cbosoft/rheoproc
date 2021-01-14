@@ -219,6 +219,11 @@ def query_db(query, *args, database='../data/.database.db', server=None, returns
     cache_key = f'QUERY: {query}, KWARGS: {kwargs}'
     obj = load_from_cache(cache_key)
     if obj is not None:
+        try:
+            n = len(obj) # very unlikely, but may raise TypeError if obj is not Iterable.
+            timestamp(f'Loaded {n} logs from cache.')
+        except TypeError:
+            timestamp(f'Loaded {type(obj)} from cache.')
         if returns == 'cache_path':
             return get_cache_path(cache_key)
         else:
