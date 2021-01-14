@@ -9,6 +9,7 @@ import sympy as sy
 class WCData(dict):
 
     def __init__(self, *, phi_o=0.646, phi_m=0.447, mu_f=0.055, sigma_star=-.078, beta=1.23):
+        super().__init__()
         self['phi_o'] = phi_o
         self['phi_m'] = phi_m
         self['mu_f'] = mu_f
@@ -23,6 +24,7 @@ class WCData(dict):
 class CSData(dict):
 
     def __init__(self, *, rho_cs=1.63, rho_water=1.0, rho_solvent=1.225, moisture_content=0.13, porosity=0.31):
+        super().__init__()
         self['rho_cs'] = rho_cs
         self['rho_water'] = rho_water
         self['rho_solvent'] = rho_solvent
