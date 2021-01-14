@@ -15,11 +15,22 @@ S600_RE = re.compile(r'^S600$')
 NONE_RE = re.compile(r'^NONE$')
 
 
+def get_cs_composition_material(material):
+    if GLYCEROL_RE.match(material) or GW_RE.match(material) or NONE_RE.match(material):
+        return 0.0
+
+    match = CSGW_RE.match(material)
+    if match:
+        perc_cs = float(match.group(1))
+        frac_cs = perc_cs / 100.0
+        return frac_cs
+
+    raise Exception(f'unknown material: {material}')
+
+
 
 def get_density_glycerol(T):
     return np.subtract(1277.0, np.multiply(0.654, T))
-
-
 
 def get_density_water(T):
     return np.multiply(1000.0, np.subtract(1.0, np.abs(np.power(np.divide(np.subtract(T, 4.0), 622.0), 1.7))))
@@ -33,13 +44,13 @@ def get_density_material(material, T):
 
     match = GLYCEROL_RE.match(material)
     if match:
-        return get_viscosity_glycerol(T)
+        return get_density_glycerol(T)
 
     match = GW_RE.match(material)
     if match:
         RG, RW = match.groups()
         Cm = float(RG) / (float(RG) + float(RW))
-        return get_viscosity_glycerol_water_mix(T, Cm)
+        return get_density_glycerol_water_mix(T, Cm)
     raise Exception(f'unknown material: {material}')
 
 
