@@ -39,10 +39,20 @@ def get_plot_name(subplot_name=None, ext='.pdf'):
     return name
 
 
+__orig_legend = pyplot.legend
+def __legend_wrapped(*args, position=None, position_offset=0.02, **kwargs):
+    if position == 'right':
+        t = 1.0 + position_offset
+        __orig_legend(loc='center left', bbox_to_anchor=(t, 0.5))
+    elif position == 'above':
+        t = 1.0 + position_offset
+        __orig_legend(loc='lower center', bbox_to_anchor=(0.5, t))
+    else:
+        __orig_legend(*args, **kwargs)
+pyplot.legend = __legend_wrapped
 
 def plot_init(*args, **kwargs):
     '''Legacy wrapper around matplotlib.'''
-
     return pyplot
 
 
