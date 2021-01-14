@@ -36,6 +36,7 @@ def head(table, rows=5, column_first=True):
 
 
 def tex_safe(unsafe_string):
+    unsafe_string = str(unsafe_string)
     safe_string = unsafe_string.replace('_', '\\_')
     safe_string = safe_string.replace('%', '\\%')
     safe_string = safe_string.replace('&', '\\&')
@@ -44,6 +45,7 @@ def tex_safe(unsafe_string):
 
 
 def bash_safe(unsafe_string):
+    unsafe_string = str(unsafe_string)
     safe_string = unsafe_string.replace('(', r'\(')
     safe_string = safe_string.replace(')', r'\)')
     safe_string = safe_string.replace(']', r'\]')
