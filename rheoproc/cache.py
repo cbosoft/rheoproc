@@ -72,10 +72,15 @@ class CacheIndex:
         data = self.read()
         return key in data
 
-    def remove(self, key):
+    def remove(self, key: str):
         data = self.read()
         del data[key]
         self.write(data)
+
+    def items(self):
+        data = self.read()
+        for key, obj_dict in data.items():
+            yield key, CachedObjectData(**obj_dict)
 
     @lru_cache
     def read(self) -> dict:
@@ -99,7 +104,19 @@ class CacheSingleton:
     def __init__(self, *args, **kwargs):
         self.check_paths()
         self.index = CacheIndex(*args, **kwargs)
+        self.clean()
         timestamp(f'Cache at \'{self.path}\' initialised.')
+
+    def clean(self):
+        marked_for_removal = list()
+        for key, obj_data in self.index.items():
+            if obj_data.is_invalid():
+                marked_for_removal.append(key)
+        self.remove(marked_for_removal)
+        n = len(marked_for_removal)
+        if n:
+            s = 's' if n > 1 else ''
+            warning(f'Removed {n} invalid object{s} from cache.')
 
     def check_paths(self):
         if not os.path.isdir(self.path):
@@ -173,12 +190,16 @@ class CacheSingleton:
             return None
         return o
 
-    def remove(self, key):
-        path = self.index[key].path
-        os.remove(path)
-        hsh = self.get_hashed_name(key, returns='hash')
-        warning(f'Deleted object {hsh[:3]}...{hsh[-3:]} from cache.')
-        self.index.remove(key)
+    def remove(self, key: [str, list]):
+        if isinstance(key, list):
+            for k in key:
+                self.remove(k)
+        else:
+            path = self.index[key].path
+            os.remove(path)
+            hsh = self.get_hashed_name(key, returns='hash')
+            warning(f'Deleted object {hsh[:3]}...{hsh[-3:]} from cache.')
+            self.index.remove(key)
 
     @property
     def path(self):
