@@ -176,8 +176,8 @@ class CacheSingleton:
             return None
 
         obj_data = self.index[key]
-        if r := obj_data.is_invalid():
-            warning(r)
+        if reason := obj_data.is_invalid():
+            warning(reason)
             self.remove(key)
             return None
 
