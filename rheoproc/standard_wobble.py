@@ -11,7 +11,6 @@ from lmfit import Parameters, minimize
 
 from rheoproc.exception import GenericRheoprocException, WobbleError
 from rheoproc.util import norm, unnorm, sqd
-from rheoproc.cache import load_from_cache
 from rheoproc.error import timestamp, warning
 from rheoproc.sql import execute_sql, insert_with_blob
 

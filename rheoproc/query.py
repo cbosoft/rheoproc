@@ -14,7 +14,7 @@ from rheoproc.combined import CombinedLogs
 from rheoproc.log import GuessLog, GuessLogType
 from rheoproc.exception import GenericRheoprocException, TooManyResultsError, QueryError
 from rheoproc.progress import ProgressBar
-from rheoproc.cache import load_from_cache, save_to_cache, get_cache_path
+from rheoproc.cache import Cache
 from rheoproc.sql import execute_sql
 from rheoproc.util import runsh, get_hostname, is_mac
 from rheoproc.error import timestamp, warning
@@ -217,7 +217,8 @@ def query_db(query, *args, database='../data/.database.db', server=None, returns
         raise QueryError(f'SQL queries can only be used to access data-containing tables in the database: \n Troublesome table: {table}')
 
     cache_key = f'QUERY: {query}, KWARGS: {kwargs}'
-    obj = load_from_cache(cache_key)
+    cache = Cache()
+    obj = cache.load_object(cache_key)
     if obj is not None:
         try:
             n = len(obj) # very unlikely, but may raise TypeError if obj is not Iterable.
@@ -225,7 +226,7 @@ def query_db(query, *args, database='../data/.database.db', server=None, returns
         except TypeError:
             timestamp(f'Loaded {type(obj)} from cache.')
         if returns == 'cache_path':
-            return get_cache_path(cache_key)
+            return cache.get_path_in_cache_of(cache_key)
         else:
             return obj
 
@@ -234,10 +235,10 @@ def query_db(query, *args, database='../data/.database.db', server=None, returns
     timestamp('Caching')
     depends_on = [log.path for log in processed_results]
     depends_on.append(database)
-    save_to_cache(cache_key, processed_results, depends_on)
+    cache.save_object(cache_key, processed_results, depends_on)
 
     if returns == 'data':
         return processed_results
     elif returns == 'cache_path':
-        return get_cache_path(cache_key)
+        return cache.get_path_in_cache_of(cache_key)
 
