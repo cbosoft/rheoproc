@@ -23,7 +23,7 @@ class WCData(dict):
 
 class CSData(dict):
 
-    def __init__(self, *, rho_cs=1.63, rho_water=1.0, rho_solvent=1.225, moisture_content=0.13, porosity=0.31):
+    def __init__(self, *, rho_cs=1.63, rho_water=1.0, rho_solvent=1.225, moisture_content=0.14, porosity=0.31):
         super().__init__()
         self['rho_cs'] = rho_cs
         self['rho_water'] = rho_water
@@ -238,7 +238,7 @@ def get_sigma_dst(*, sigma_star, beta, phi_m, phi_o, mu_f,
     return phi_DST, sigma_DST, gd_DST
 
 
-def predict_strainrate(mf, sigma, cs_data=None, wc_data=None):
+def predict_strainrate(mf, sigma, *, cs_data=None, wc_data=None):
     if cs_data is None:
         cs_data = CSData()
     if wc_data is None:
