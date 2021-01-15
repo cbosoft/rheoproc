@@ -16,6 +16,42 @@ from rheoproc.error import timestamp, warning
 CACHE_DIR = os.path.expanduser("~/.cache/rheoproc")
 
 
+class CachedObjectData:
+
+    def __init__(self, *, path, expires=None, depends_on=None):
+        self.path = path
+        self.expires = expires
+        self.depends_on = depends_on
+
+    def is_invalid(self):
+        if self.expires is not None:
+            pass
+        if not os.path.isfile(self.path):
+            return 'Could not find cached blob.'
+
+        now = time.time()
+        if self.expires is not None and now > self.expires:
+            return 'Cache item expired.'
+
+        if self.depends_on is not None:
+            pickle_mtime = os.path.getmtime(self.path)
+            for dep in self.depends_on:
+                dep_mtime = os.path.getmtime(dep)
+
+                if dep_mtime > pickle_mtime:
+                    return f'Dependency {dep} newer than cache.'
+        return False
+
+    def as_dict(self):
+        rv = {'path': self.path}
+        if self.expires is not None:
+            rv['expires'] = self.expires
+        if self.depends_on is not None:
+            rv['depends_on'] = self.depends_on
+        return rv
+
+
+
 class CacheIndex:
 
     def __init__(self, path=None):
@@ -23,9 +59,9 @@ class CacheIndex:
             path = f'{CACHE_DIR}/index.json'
         self.path = path
 
-    def __getitem__(self, item):
+    def __getitem__(self, item) -> CachedObjectData:
         data = self.read()
-        return data[item]
+        return CachedObjectData(**data[item])
 
     def __setitem__(self, key, value):
         data = self.read()
@@ -73,35 +109,42 @@ class CacheSingleton:
             with open(f'{self.path}/index.json', 'w') as indexf:
                 json.dump(dict(), indexf)
 
-    def get_hashed_name(self, name: str):
+    def get_hashed_name(self, name: str, returns='both'):
         hsh = hashlib.sha1(name.encode()).hexdigest()
-        return f'{CACHE_DIR}/{hsh}.pickle', hsh
+        name = f'{self.path}/{hsh}.pickle'
+        if returns == 'both':
+            return name, hsh
+        elif returns == 'hash':
+            return hsh
+        elif returns == 'name':
+            return name
+        raise ValueError(f'Unknown returns value \'{returns}\'. Valid values are \'hash\', \'name\', and \'both\' (the default).')
 
     def get_path_in_cache_of(self, key):
-        return self.index[key]['path']
+        return self.index[key].path
 
     def save_object(self, key, obj, depends_on=None, expires=None, expires_in_seconds=None, expires_in_days=None):
         name, hsh = self.get_hashed_name(key)
 
         if key not in self.index:
-            obj_data = dict()
-            obj_data['path'] = name
+            obj_data = CachedObjectData(path=name)
+            obj_data.path = name
 
             if depends_on:
                 if isinstance(depends_on, str):
                     depends_on = [depends_on]
-                obj_data['depends_on'] = depends_on
+                obj_data.depends_on = depends_on
 
             if expires is not None:
-                obj_data['expires'] = expires
+                obj_data.expires = expires
             elif expires_in_seconds is not None:
-                obj_data['expires'] = time.time() + expires_in_seconds
+                obj_data.expires = time.time() + expires_in_seconds
             elif expires_in_days is not None:
-                obj_data['expires'] = time.time() + (expires_in_days * 60. * 60. * 24.)
+                obj_data.expires = time.time() + (expires_in_days * 60. * 60. * 24.)
 
-            self.index[key] = obj_data
+            self.index[key] = obj_data.as_dict()
 
-        timestamp(f'saving object {hsh[:3]}...{hsh[-3:]} to cache.')
+        timestamp(f'Saving object {hsh[:3]}...{hsh[-3:]} to cache.')
         with open(name, 'wb') as pf:
             pickle.dump(obj, pf, protocol=4)
 
@@ -112,39 +155,30 @@ class CacheSingleton:
 
         if '--fresh' in sys.argv:
             warning('Clearing cached version of requested object.')
-            self.index.remove(key)
+            self.remove(key)
             return None
 
         obj_data = self.index[key]
-        if not os.path.isfile(obj_data['path']):
-            warning('Could not find cached blob; removing from index.')
-            self.index.remove(key)
+        if r := obj_data.is_invalid():
+            warning(r)
+            self.remove(key)
             return None
-
-        now = time.time()
-        if 'expires' in obj_data.keys() and now > obj_data['expires']:
-            timestamp('Cache item expired; removing from index.')
-            self.index.remove(key)
-            return None
-
-        if 'depends_on' in obj_data.keys():
-            pickle_mtime = os.path.getmtime(obj_data['path'])
-            for dep in obj_data['depends_on']:
-                dep_mtime = os.path.getmtime(dep)
-
-                if dep_mtime > pickle_mtime:
-                    warning(f'Dependency {dep} newer than cache.')
-                    return None
 
         try:
-            with open(obj_data['path'], 'rb') as pf:
+            with open(obj_data.path, 'rb') as pf:
                 o = pickle.load(pf)
         except Exception as e:
-            warning(f'Error loading cached file; removing from index. Error: {e}')
-            os.remove(obj_data['path'])
-            self.index.remove(key)
+            warning(f'Error loading cached file: {e}')
+            self.remove(key)
             return None
         return o
+
+    def remove(self, key):
+        path = self.index[key].path
+        os.remove(path)
+        hsh = self.get_hashed_name(key, returns='hash')
+        warning(f'Deleted object {hsh[:3]}...{hsh[-3:]} from cache.')
+        self.index.remove(key)
 
     @property
     def path(self):
