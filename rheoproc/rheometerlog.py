@@ -281,7 +281,11 @@ class RheometerLog(GenericLog):
             position.append(dti*spi + position[-1])
         # position in rotations
 
-        loadcell = remove_standard_wobble(position, loadcell, self.motor, standard_wobble_method)
+        try:
+            loadcell = remove_standard_wobble(position, loadcell, self.motor, standard_wobble_method)
+        except GenericRheoprocException:
+            warning(f'Error removing wobbling in log {self.ID}')
+            raise
         # LC value seems to be hovering around 2**31, halfway up a 32-bit integer. Somewhere I've made a mistake
         # converting an unsigned int.
 
