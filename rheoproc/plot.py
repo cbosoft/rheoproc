@@ -90,7 +90,7 @@ class Shaperist:
 
 __orig_plot = pyplot.plot
 def __plot_wrapped(*args, colour_by=None, shape_by=None, colourist=None, shaperist=None, auto_raster=True, **kwargs):
-    if args and auto_raster:
+    if args and auto_raster and len(args) > 2:
         if len(args[0]) > 10000:
             kwargs['rasterized'] = True
     if colour_by is None:
