@@ -9,6 +9,7 @@ from rheoproc.util import is_between
 # glycerol and water information from Cheng2008
 
 GLYCEROL_RE = re.compile(r'^G0999$')
+GLYCEROL_DILUTE_RE = re.compile(r'^G0966$')
 GW_RE = re.compile(r'^G(\d*):W(\d*)$')
 CSGW_RE = re.compile(r'^CS(\d*):\(G(\d*):W(\d*)\)$')
 S600_RE = re.compile(r'^S600$')
@@ -42,15 +43,17 @@ def get_density_glycerol_water_mix(T, Cm):
 
 def get_density_material(material, T):
 
-    match = GLYCEROL_RE.match(material)
-    if match:
+    if GLYCEROL_RE.match(material):
         return get_density_glycerol(T)
 
-    match = GW_RE.match(material)
-    if match:
+    if GLYCEROL_DILUTE_RE.match(material):
+        return get_density_glycerol_water_mix(T, 0.966)
+
+    if match := GW_RE.match(material):
         RG, RW = match.groups()
         Cm = float(RG) / (float(RG) + float(RW))
         return get_density_glycerol_water_mix(T, Cm)
+
     raise Exception(f'unknown material: {material}')
 
 
@@ -105,22 +108,22 @@ def get_viscosity_s600(T):
 
 def get_material_viscosity(material, T):
 
-    match = GLYCEROL_RE.match(material)
-    if match:
+    if GLYCEROL_RE.match(material):
         return get_viscosity_glycerol(T)
 
-    match = GW_RE.match(material)
-    if match:
+    if GLYCEROL_DILUTE_RE.match(material):
+        return get_viscosity_glycerol_water_mix(T, 0.966)
+
+    if match := GW_RE.match(material):
         RG, RW = match.groups()
         Cm = float(RG) / (float(RG) + float(RW))
         return get_viscosity_glycerol_water_mix(T, Cm)
 
-    match = S600_RE.match(material)
-    if match:
+
+    if S600_RE.match(material):
         return get_viscosity_s600(T)
 
-    match = NONE_RE.match(material)
-    if match:
+    if NONE_RE.match(material):
         return np.full(np.shape(T), 0.0)
 
     return np.full(np.shape(T), -1.0)
