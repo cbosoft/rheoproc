@@ -169,7 +169,7 @@ def get_gamma_dot(sigma, eta):
     #    rv = 0.0
     return rv
 
-def get_sigma_jam(phi, phi_m, phi_o, beta, sigma_star):
+def get_sigma_jam(phi, phi_m, phi_o, beta, sigma_star, **kwargs):
     A = np.multiply(np.log(np.divide(np.subtract(phi, phi_o), np.subtract(phi_m, phi_o))), -1)
     return np.divide(sigma_star, np.power(A, 1.0/beta))
     #f_sigj = sy.lambdify([sigma_star, phi, phi_o, phi_m, beta], e_sigj, 'numpy')
