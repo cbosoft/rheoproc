@@ -132,11 +132,18 @@ __orig_legend = pyplot.legend
 def __legend_wrapped(*args, position=None, position_offset=0.02, **kwargs):
     if position == 'right':
         t = 1.0 + position_offset
-        __orig_legend(loc='center left', bbox_to_anchor=(t, 0.5))
+        __orig_legend(*args, loc='center left', bbox_to_anchor=(t, 0.5), **kwargs)
+    elif position == 'left':
+        t = -position_offset
+        __orig_legend(*args, loc='center right', bbox_to_anchor=(t, 0.5), **kwargs)
     elif position == 'above':
         t = 1.0 + position_offset
-        __orig_legend(loc='lower center', bbox_to_anchor=(0.5, t))
+        __orig_legend(*args, loc='lower center', bbox_to_anchor=(0.5, t), **kwargs)
+    elif position == 'below':
+        t = -position_offset
+        __orig_legend(*args, loc='upper center', bbox_to_anchor=(0.5, t), **kwargs)
     else:
+        if position is not None: warning(f'pyplot.legend got an unknown position \'{position}\'. Try \'right\' or \'above\'.')
         __orig_legend(*args, **kwargs)
 pyplot.legend = __legend_wrapped
 
