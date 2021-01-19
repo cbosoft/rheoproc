@@ -46,3 +46,6 @@ class ZeroSpeedError(GenericRheoprocException):
 
 class WobbleError(GenericRheoprocException):
     '''Error loading wobble data from database'''
+
+class ScriptCacheError(GenericRheoprocException):
+    '''Cache expected object from script; not found.'''

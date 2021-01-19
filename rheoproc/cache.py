@@ -11,6 +11,8 @@ import time
 from functools import lru_cache
 
 from rheoproc.error import timestamp, warning
+from rheoproc.exception import ScriptCacheError
+from rheoproc.util import run_other_script
 
 
 CACHE_DIR = os.path.expanduser("~/.cache/rheoproc")
@@ -200,6 +202,17 @@ class CacheSingleton:
             hsh = self.get_hashed_name(key, returns='hash')
             warning(f'Deleted object {hsh[:3]}...{hsh[-3:]} from cache.')
             self.index.remove(key)
+
+    def load_object_or_run_script(self, key, script_path):
+        o = self.load_object(key)
+        if o is not None:
+            return o
+        run_other_script(script_path)
+        o = self.load_object(key)
+        if o is None:
+            raise ScriptCacheError(f'Cache expected object with name {key} to be created by script "{script_path}", but object not created by script.')
+        return o
+
 
     @property
     def path(self):
