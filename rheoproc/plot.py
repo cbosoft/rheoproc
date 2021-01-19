@@ -97,6 +97,8 @@ def __plot_wrapped(*args, colour_by=None, shape_by=None, colourist=None, shaperi
         if shape_by is None:
             __orig_plot(*args, **kwargs)
         else:
+            if shaperist is None:
+                shaperist = Shaperist()
             x, y = args[:2]
             args = args[2:]
             xc, yc = defaultdict(list), defaultdict(list)
@@ -110,6 +112,8 @@ def __plot_wrapped(*args, colour_by=None, shape_by=None, colourist=None, shaperi
                 _kwargs = {'fmt': shaperist[c], **kwargs}
                 __plot_wrapped(x, y, *args, **_kwargs)
     else:
+        if colourist is None:
+            colourist = Colourist()
         x, y = args[:2]
         args = args[2:]
         xc, yc = defaultdict(list), defaultdict(list)
