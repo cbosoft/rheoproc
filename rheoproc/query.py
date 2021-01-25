@@ -93,8 +93,9 @@ def get_group(GROUP, database='../data/.database.db', Log=GuessLog, order_by=Non
 
 def async_get(args_and_kwargs):
     q, args, kwargs = args_and_kwargs
-    set_q(q)
-    set_worker()
+    if q:
+        set_q(q)
+        set_worker()
     try:
         rv = GuessLog(*args, **kwargs)
     except GenericRheoprocException as e:
@@ -150,17 +151,22 @@ def get_from_local(query, *, database='../data/.database.db', process_results=Tr
     order = [r['ID'] for r in results]
 
     processes = get_n_processes()
+    if '--max-proc' in sys.argv:
+        max_processes = int(sys.argv[sys.argv.index('--max-proc')+1])
     processes = min([processes, max_processes])
 
     timestamp(f'processing {len(results)} logs over {processes} processes.')
 
     data_dir = '/'.join(database.split('/')[:-1])
 
-    mp.set_start_method('fork', True)
-    m = mp.Manager()
-    q = m.Queue()
-    printer_thread = threading.Thread(target=printer, args=(q,pb), daemon=True)
-    printer_thread.start()
+    if processes > 1:
+        mp.set_start_method('fork', True)
+        m = mp.Manager()
+        q = m.Queue()
+        printer_thread = threading.Thread(target=printer, args=(q,pb), daemon=True)
+        printer_thread.start()
+    else:
+        q = None
     list_of_args_kwargs = [(q, (dict(res), data_dir), kwargs) for res in results]
     if processes == 1:
         warning('Only using one core: this could take a while.')
@@ -175,8 +181,9 @@ def get_from_local(query, *, database='../data/.database.db', process_results=Tr
                 pb.update()
                 if r:
                     processed_results[r.ID] = r
-    q.put(0)
-    printer_thread.join()
+    if processes > 1:
+        q.put(0)
+        printer_thread.join()
 
     timestamp('Sorting')
     for ID in order:
