@@ -1,10 +1,13 @@
 # rheoproc.label
 # Functions for uniformly formatting units in plot labels.
 
-def fmt_lbl(label, symbol, unit):
-    lbl = label
+def fmt_lbl(label, symbol, unit, no_label=False):
+    assert (not no_label) or symbol
+    lbl = '' if no_label else label
     if symbol or unit:
-        lbl += ', $'
+        if not no_label:
+            lbl += ', '
+        lbl += '$'
     if symbol:
         lbl += f'{symbol}'
     if unit:
@@ -14,72 +17,72 @@ def fmt_lbl(label, symbol, unit):
     return lbl
 
 
-def strainrate_label(units=r's^{-1}'):
-    return fmt_lbl('Strain rate', '\\dot\\gamma', units)
+def strainrate_label(units=r's^{-1}', **kwargs):
+    return fmt_lbl('Strain rate', '\\dot\\gamma', units, **kwargs)
 
 
-def strain_label(units=r'(unitless)'):
-    return fmt_lbl('Strain', '\\gamma', units)
+def strain_label(units=r'(unitless)', **kwargs):
+    return fmt_lbl('Strain', '\\gamma', units, **kwargs)
 
 
-def stress_label(units='Pa'):
-    return fmt_lbl('Stress', '\\sigma', units)
+def stress_label(units='Pa', **kwargs):
+    return fmt_lbl('Stress', '\\sigma', units, **kwargs)
 
 
-def viscosity_label(units=r'Pa\,s'):
-    return fmt_lbl('Viscosity', '\\mu', units)
+def viscosity_label(units=r'Pa\,s', **kwargs):
+    return fmt_lbl('Viscosity', '\\mu', units, **kwargs)
 
 
-def temperature_label(units='K'):
-    return fmt_lbl('Temperature', 'T', units)
+def temperature_label(units='K', **kwargs):
+    return fmt_lbl('Temperature', 'T', units, **kwargs)
 
 
-def time_label(units='s'):
-    return fmt_lbl('Time', 't', units)
+def time_label(units='s', **kwargs):
+    return fmt_lbl('Time', 't', units, **kwargs)
 
 
-def freq_label(units='Hz', symbol='\\omega'):
-    return fmt_lbl('Frequency', symbol, units)
+def freq_label(units='Hz', symbol='\\omega', **kwargs):
+    return fmt_lbl('Frequency', symbol, units, **kwargs)
 
 
-def angular_position_label(units='rot', symbol='\\theta'):
-    return fmt_lbl('Angular Position', symbol, units)
+def angular_position_label(units='rot', symbol='\\theta', **kwargs):
+    return fmt_lbl('Angular Position', symbol, units, **kwargs)
 
 
-def angular_velocity_label(units=r'rot\,s^{-1}', symbol='\\omega_r'):
-    return fmt_lbl('Angular Velocity', symbol, units)
+def angular_velocity_label(units=r'rot\,s^{-1}', symbol='\\omega_r', **kwargs):
+    return fmt_lbl('Angular Velocity', symbol, units, **kwargs)
 
-def speed_label(units=r'rot\,s^{-1}', symbol='\\omega_r'):
-    return fmt_lbl('Angular Velocity', symbol, units)
-
-
-def loadcell_label(units=None, symbol=r'\Lambda'):
-    return fmt_lbl('Loadcell Value', symbol, units)
+def speed_label(units=r'rot\,s^{-1}', symbol='\\omega_r', **kwargs):
+    return fmt_lbl('Angular Velocity', symbol, units, **kwargs)
 
 
-def loadcell_norm_label(units=None, symbol=r'\hat\Lambda'):
-    return fmt_lbl('Normalised Loadcell Value', symbol, units)
+def loadcell_label(units=None, symbol=r'\Lambda', **kwargs):
+    return fmt_lbl('Loadcell Value', symbol, units, **kwargs)
 
-def prsd_label(prop, symbol):
-    return fmt_lbl(f'PRSD ({prop})', f'\\Sigma_{{{symbol}}}^{{\\%}}', '\\%')
 
-def prsd_stress_label():
-    return prsd_label('stress', '\\sigma')
+def loadcell_norm_label(units=None, symbol=r'\hat\Lambda', **kwargs):
+    return fmt_lbl('Normalised Loadcell Value', symbol, units, **kwargs)
 
-def prsd_strainrate_label():
-    return prsd_label('strainrate', '\\dot\\gamma')
+def prsd_label(prop, symbol, **kwargs):
+    return fmt_lbl(f'PRSD ({prop})', f'\\Sigma_{{{symbol}}}^{{\\%}}', '\\%', **kwargs)
 
-def prsd_speed_label():
-    return prsd_label('angular velocity', '\\omega_r')
+def prsd_stress_label(**kwargs):
+    return prsd_label('stress', '\\sigma', **kwargs)
 
-def prsd_viscosity_label():
-    return prsd_label('viscosity', '\\mu')
+def prsd_strainrate_label(**kwargs):
+    return prsd_label('strainrate', '\\dot\\gamma', **kwargs)
 
-def pnd_label(units='V', symbol=r'V_{PND}'):
-    return fmt_lbl('PND Voltage', symbol, units)
+def prsd_speed_label(**kwargs):
+    return prsd_label('angular velocity', '\\omega_r', **kwargs)
 
-def pnd_mono_label(units='V', symbol=r'\left|V_{PND}\right|'):
-    return fmt_lbl('PND Voltage (single channel)', symbol, units)
+def prsd_viscosity_label(**kwargs):
+    return prsd_label('viscosity', '\\mu', **kwargs)
+
+def pnd_label(units='V', symbol=r'V_{PND}', **kwargs):
+    return fmt_lbl('PND Voltage', symbol, units, **kwargs)
+
+def pnd_mono_label(units='V', symbol=r'\left|V_{PND}\right|', **kwargs):
+    return fmt_lbl('PND Voltage (single channel)', symbol, units, **kwargs)
 
 
 def ffty_label(units=None, symbol=None):
