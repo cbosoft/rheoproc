@@ -207,6 +207,7 @@ class CacheSingleton:
         o = self.load_object(key)
         if o is not None:
             return o
+        timestamp(f'Object not in cache: running script \'{script_path}\'.')
         run_other_script(script_path)
         o = self.load_object(key)
         if o is None:
